@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react"
 import { PlusSquare, List } from "lucide-react"
-import { C } from "./tokens"
 import { AuthProvider } from "./context/AuthCtx"
 import { ProfileCtx } from "./context/ProfileCtx"
 import { RoleCtx } from "./context/RoleCtx"
@@ -64,13 +63,13 @@ function AppInner() {
         {bp === "mobile" ? (
           <>
             <MobileHeader role={role} onToggle={switchRole} page={page} onPage={setPage} />
-            <main style={{ paddingBottom: 70 }}>{renderPage()}</main>
+            <main style={{ paddingBottom: 56 }}>{renderPage()}</main>
             <BottomNav page={page} onPage={setPage} role={role} />
           </>
         ) : (
           <>
             <Sidebar page={page} onPage={setPage} role={role} onToggle={switchRole} />
-            <main style={{ marginLeft: 240, minHeight: "100vh" }}>{renderPage()}</main>
+            <main style={{ marginLeft: 220, minHeight: "100vh" }}>{renderPage()}</main>
           </>
         )}
       </ProfileCtx.Provider>

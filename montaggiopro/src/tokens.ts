@@ -1,35 +1,35 @@
 export const C = {
-  bg:     "#FAFAFA",
+  bg:     "#F2F2F2",
   white:  "#FFFFFF",
-  border: "#DBDBDB",
-  text:   "#262626",
-  sub:    "#8E8E8E",
-  accent: "#0095F6",
-  green:  "#22C55E",
-  amber:  "#F59E0B",
-  red:    "#EF4444",
-  font:   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  border: "#E5E5E5",
+  text:   "#0F0F0F",
+  sub:    "#606060",
+  accent: "#0F0F0F",
+  red:    "#FF0000",
+  green:  "#2BA640",
+  amber:  "#FF8C00",
+  font:   "'Montserrat', sans-serif",
 } as const
 
 export const PALETTES: [string, string][] = [
-  ["#0095F6","#00C6FF"], ["#8B5CF6","#D946EF"], ["#10B981","#34D399"],
-  ["#F59E0B","#FCD34D"], ["#EF4444","#F97316"], ["#EC4899","#FB7185"],
-  ["#06B6D4","#67E8F9"], ["#6366F1","#818CF8"], ["#14B8A6","#2DD4BF"],
+  ["#606060","#606060"], ["#0F0F0F","#0F0F0F"], ["#2BA640","#2BA640"],
+  ["#065FD4","#065FD4"], ["#FF0000","#FF0000"], ["#FF8C00","#FF8C00"],
+  ["#7C3AED","#7C3AED"], ["#0E7490","#0E7490"], ["#BE185D","#BE185D"],
 ]
 
 export const AVAIL_STYLE = {
-  free:    { bg:"#F0FDF4", color:"#15803D" },
-  partial: { bg:"#FFFBEB", color:"#D97706" },
-  busy:    { bg:"#FEF2F2", color:"#DC2626" },
+  free:    { bg: "#E8F5E9", color: "#2E7D32" },
+  partial: { bg: "#FFF3E0", color: "#E65100" },
+  busy:    { bg: "#FFEBEE", color: "#C62828" },
 } as const
 
-export const JOB_COLORS: Record<string, [string,string]> = {
-  Cucina:  ["#0095F6","#00C6FF"],
-  Bagno:   ["#8B5CF6","#D946EF"],
-  Living:  ["#10B981","#34D399"],
-  Camera:  ["#F59E0B","#FCD34D"],
-  Armadio: ["#EF4444","#F97316"],
-  Ufficio: ["#64748B","#94A3B8"],
+export const JOB_COLORS: Record<string, string> = {
+  Cucina:  "#065FD4",
+  Bagno:   "#7C3AED",
+  Living:  "#2BA640",
+  Camera:  "#FF8C00",
+  Armadio: "#C62828",
+  Ufficio: "#606060",
 }
 
 export const SPEC_OPTIONS  = ["Cucine","Bagni","Living","Camere","Armadi","Uffici","Contract"]

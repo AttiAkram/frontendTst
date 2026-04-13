@@ -56,41 +56,41 @@ export function SettingsPage({ profile, updateProfile }: Props) {
 
   const tabNav = (
     <div style={bp === "mobile"
-      ? { display: "flex", gap: 4, overflowX: "auto", marginBottom: 16, padding: "4px 0" }
-      : { width: 200, flexShrink: 0 }
+      ? { display: "flex", gap: 4, overflowX: "auto", marginBottom: 12, padding: "2px 0" }
+      : { width: 180, flexShrink: 0 }
     }>
       {TABS.map(t => (
         <button key={t.key} onClick={() => setTab(t.key)} style={{
           display: "flex", alignItems: "center", gap: 8, width: bp === "mobile" ? undefined : "100%",
-          padding: "10px 14px", borderRadius: 8, border: "none", cursor: "pointer",
-          fontSize: 14, fontWeight: tab === t.key ? 600 : 400, fontFamily: C.font,
-          color: tab === t.key ? C.accent : C.text,
-          background: tab === t.key ? "#F0F9FF" : "transparent",
-          whiteSpace: "nowrap", transition: "all 200ms",
+          padding: "8px 12px", borderRadius: 8, border: "none", cursor: "pointer",
+          fontSize: 13, fontWeight: tab === t.key ? 600 : 400, fontFamily: C.font,
+          color: tab === t.key ? C.text : C.sub,
+          background: tab === t.key ? C.bg : "transparent",
+          whiteSpace: "nowrap", transition: "all 150ms",
         }}>
-          <t.icon size={16} /> {t.label}
+          <t.icon size={15} strokeWidth={1.5} /> {t.label}
         </button>
       ))}
     </div>
   )
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: 16 }}>
-      <div style={{ fontSize: 22, fontWeight: 700, color: C.text, fontFamily: C.font, marginBottom: 20 }}>Impostazioni</div>
-      <div style={bp === "mobile" ? {} : { display: "flex", gap: 24 }}>
+    <div style={{ maxWidth: 720, margin: "0 auto", padding: "12px 16px" }}>
+      <div style={{ fontSize: 18, fontWeight: 700, color: C.text, fontFamily: C.font, marginBottom: 16 }}>Impostazioni</div>
+      <div style={bp === "mobile" ? {} : { display: "flex", gap: 20 }}>
         {tabNav}
-        <div style={{ flex: 1, background: C.white, borderRadius: 12, padding: 20, border: `1px solid ${C.border}` }}>
+        <div style={{ flex: 1, background: C.white, borderRadius: 12, padding: 16 }}>
           {tab === "profilo" && <ProfileTab form={form} update={updateForm} />}
           {tab === "account" && <AccountTab />}
           {tab === "notifiche" && <NotificationsTab form={notif} update={updateNotif} />}
           {tab === "privacy" && <PrivacyTab form={privacy} update={updatePrivacy} />}
-          <div style={{ display: "flex", gap: 12, marginTop: 24, justifyContent: "flex-end" }}>
+          <div style={{ display: "flex", gap: 8, marginTop: 20, justifyContent: "flex-end" }}>
             <Btn variant="secondary" onClick={cancel}>Annulla</Btn>
-            <Btn onClick={save} loading={saving}>Salva modifiche</Btn>
+            <Btn onClick={save} loading={saving}>Salva</Btn>
           </div>
         </div>
       </div>
-      <Toast message="Profilo aggiornato!" visible={toast} />
+      <Toast message="Salvato!" visible={toast} />
     </div>
   )
 }

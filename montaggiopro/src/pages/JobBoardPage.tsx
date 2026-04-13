@@ -18,14 +18,13 @@ export function JobBoardPage() {
   )
 
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto", padding: 16 }}>
+    <div style={{ maxWidth: 560, margin: "0 auto", padding: "12px 16px" }}>
       <FilterBar filters={TYPE_FILTERS} active={typeFilter} onChange={setTypeFilter} />
       <FilterBar filters={PROV_FILTERS} active={provFilter} onChange={setProvFilter} />
-      {filtered.length === 0 ? (
-        <EmptyState label="Nessun lavoro trovato" icon={Briefcase} />
-      ) : (
-        filtered.map((j, i) => <JobCard key={j.id} job={j} delay={i * 100} />)
-      )}
+      {filtered.length === 0
+        ? <EmptyState label="Nessun lavoro trovato" icon={Briefcase} />
+        : filtered.map((j, i) => <JobCard key={j.id} job={j} delay={i * 80} />)
+      }
     </div>
   )
 }

@@ -9,7 +9,7 @@ export function FormGrid({ children }: Props) {
     <div style={{
       display: "grid",
       gridTemplateColumns: bp === "mobile" ? "1fr" : "1fr 1fr",
-      gap: 24,
+      gap: 16,
     }}>
       {children}
     </div>

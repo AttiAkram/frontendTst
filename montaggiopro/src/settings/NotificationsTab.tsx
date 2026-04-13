@@ -4,11 +4,11 @@ import type { NotifPrefs } from "../types"
 interface Props { form: NotifPrefs; update: (key: keyof NotifPrefs, val: boolean) => void }
 
 const ITEMS: { key: keyof NotifPrefs; label: string; desc: string }[] = [
-  { key: "nuoviLavori",   label: "Nuovi lavori",    desc: "Ricevi notifiche quando vengono pubblicati nuovi lavori nella tua zona" },
-  { key: "messaggi",      label: "Messaggi",        desc: "Notifiche per nuovi messaggi ricevuti" },
-  { key: "recensioni",    label: "Recensioni",      desc: "Notifiche quando ricevi una nuova recensione" },
-  { key: "aggiornamenti", label: "Aggiornamenti",   desc: "Novità sulla piattaforma e nuove funzionalità" },
-  { key: "newsletter",    label: "Newsletter",      desc: "Report settimanale con statistiche e opportunità" },
+  { key: "nuoviLavori",   label: "Nuovi lavori",    desc: "Nuovi lavori nella tua zona" },
+  { key: "messaggi",      label: "Messaggi",        desc: "Nuovi messaggi ricevuti" },
+  { key: "recensioni",    label: "Recensioni",      desc: "Nuove recensioni" },
+  { key: "aggiornamenti", label: "Aggiornamenti",   desc: "Novità della piattaforma" },
+  { key: "newsletter",    label: "Newsletter",      desc: "Report settimanale" },
 ]
 
 export function NotificationsTab({ form, update }: Props) {

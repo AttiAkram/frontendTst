@@ -17,17 +17,21 @@ export function AvailCalendar({ avail }: Props) {
   const startDay = (month.getDay() + 6) % 7
 
   return (
-    <div style={{ background: C.white, borderRadius: 12, padding: 16, border: `1px solid ${C.border}` }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-        <ChevronLeft size={20} color={C.text} style={{ cursor: "pointer" }} onClick={() => setMonthOffset(m => m - 1)} />
-        <span style={{ fontSize: 15, fontWeight: 600, color: C.text, fontFamily: C.font }}>
+    <div style={{ background: C.white, borderRadius: 12, padding: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <button onClick={() => setMonthOffset(m => m - 1)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex" }}>
+          <ChevronLeft size={18} color={C.text} />
+        </button>
+        <span style={{ fontSize: 13, fontWeight: 600, color: C.text, fontFamily: C.font }}>
           {MONTHS[month.getMonth()]} {month.getFullYear()}
         </span>
-        <ChevronRight size={20} color={C.text} style={{ cursor: "pointer" }} onClick={() => setMonthOffset(m => m + 1)} />
+        <button onClick={() => setMonthOffset(m => m + 1)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex" }}>
+          <ChevronRight size={18} color={C.text} />
+        </button>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, textAlign: "center" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 3, textAlign: "center" }}>
         {DAYS.map(d => (
-          <div key={d} style={{ fontSize: 11, fontWeight: 600, color: C.sub, fontFamily: C.font, padding: 4 }}>{d}</div>
+          <div key={d} style={{ fontSize: 10, fontWeight: 600, color: C.sub, fontFamily: C.font, padding: 4 }}>{d}</div>
         ))}
         {Array.from({ length: startDay }).map((_, i) => <div key={`e${i}`} />)}
         {Array.from({ length: daysInMonth }, (_, i) => {
@@ -36,17 +40,17 @@ export function AvailCalendar({ avail }: Props) {
           const s = AVAIL_STYLE[status]
           return (
             <div key={day} style={{
-              padding: 6, borderRadius: 6, fontSize: 13, fontWeight: 500,
+              padding: 5, borderRadius: 6, fontSize: 12, fontWeight: 500,
               background: s.bg, color: s.color, fontFamily: C.font, cursor: "pointer",
             }}>{day}</div>
           )
         })}
       </div>
-      <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 16 }}>
+      <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 12 }}>
         {(["free","partial","busy"] as const).map(s => (
-          <div key={s} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: C.sub, fontFamily: C.font }}>
-            <div style={{ width: 10, height: 10, borderRadius: 3, background: AVAIL_STYLE[s].bg, border: `1px solid ${AVAIL_STYLE[s].color}` }} />
-            {s === "free" ? "Disponibile" : s === "partial" ? "Parziale" : "Occupato"}
+          <div key={s} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: C.sub, fontFamily: C.font }}>
+            <div style={{ width: 8, height: 8, borderRadius: 2, background: AVAIL_STYLE[s].color }} />
+            {s === "free" ? "Libero" : s === "partial" ? "Parziale" : "Occupato"}
           </div>
         ))}
       </div>

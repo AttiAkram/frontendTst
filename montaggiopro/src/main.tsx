@@ -1,14 +1,20 @@
 import React from "react"
 import ReactDOM from "react-dom/client"
 import App from "./App"
-import { C } from "./tokens"
 
 const style = document.createElement("style")
 style.textContent = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: ${C.bg}; font-family: ${C.font}; }
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-thumb { background: ${C.border}; border-radius: 2px; }
+  body {
+    background: #F2F2F2;
+    font-family: 'Montserrat', sans-serif;
+    color: #0F0F0F;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #CCC; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #AAA; }
   @keyframes shimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
@@ -17,6 +23,8 @@ style.textContent = `
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
   }
+  button { font-family: 'Montserrat', sans-serif; }
+  input, textarea { font-family: 'Montserrat', sans-serif; }
 `
 document.head.appendChild(style)
 

@@ -10,20 +10,20 @@ interface Props { profile: Profile; onTeamClick: (t: Team) => void }
 export function FeedPage({ profile, onTeamClick }: Props) {
   const bp = useBreakpoint()
   const content = (
-    <div style={{ flex: 1, maxWidth: 600 }}>
+    <div style={{ flex: 1, maxWidth: 560, minWidth: 0 }}>
       <StoryReel teams={TEAMS} />
-      {POSTS.map((p, i) => <PostCard key={p.id} post={p} delay={i * 100} />)}
+      {POSTS.map((p, i) => <PostCard key={p.id} post={p} delay={i * 80} />)}
     </div>
   )
 
   if (bp === "wide") {
     return (
-      <div style={{ display: "flex", maxWidth: 920, margin: "0 auto", padding: 16 }}>
+      <div style={{ display: "flex", maxWidth: 860, margin: "0 auto", padding: "12px 16px" }}>
         {content}
         <FeedRightSidebar profile={profile} onTeamClick={onTeamClick} />
       </div>
     )
   }
 
-  return <div style={{ maxWidth: 600, margin: "0 auto", padding: 16 }}>{content}</div>
+  return <div style={{ maxWidth: 560, margin: "0 auto", padding: "12px 16px" }}>{content}</div>
 }

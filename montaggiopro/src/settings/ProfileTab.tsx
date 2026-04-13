@@ -12,13 +12,12 @@ interface Props { form: Profile; update: (key: string, val: unknown) => void }
 export function ProfileTab({ form, update }: Props) {
   return (
     <div>
-      <AvatarPicker colors={form.colors} char={form.char}
-        onChange={c => update("colors", c)} />
+      <AvatarPicker colors={form.colors} char={form.char} onChange={c => update("colors", c)} />
       <FormGrid>
         <Input label="Nome squadra" value={form.name} onChange={v => update("name", v)} />
         <Input label="Iniziale avatar" value={form.char} onChange={v => update("char", v.slice(0, 1).toUpperCase())} />
         <Input label="Nome leader" value={form.leader} onChange={v => update("leader", v)} />
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <Input label="Membri" value={String(form.members)} onChange={v => update("members", Number(v) || 0)} />
           <Input label="Anni esp." value={String(form.experience)} onChange={v => update("experience", Number(v) || 0)} />
         </div>
@@ -26,14 +25,16 @@ export function ProfileTab({ form, update }: Props) {
         <FullRow><MultiChip label="Specializzazioni" options={SPEC_OPTIONS} selected={form.specs} onChange={v => update("specs", v)} /></FullRow>
         <FullRow><MultiChip label="Zone operative" options={ZONE_OPTIONS} selected={form.zones} onChange={v => update("zones", v)} /></FullRow>
       </FormGrid>
-      <SettingsSection title="Attrezzatura" description="Seleziona il tipo di furgone e gli strumenti disponibili">
-        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+      <SettingsSection title="Attrezzatura" description="Furgone e strumenti disponibili">
+        <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
           {VAN_SIZES.map(s => (
             <button key={s} onClick={() => update("equipment", { ...form.equipment, van: s as VanSize })} style={{
-              flex: 1, padding: "10px 0", borderRadius: 8, fontSize: 13, fontWeight: 600,
-              fontFamily: C.font, cursor: "pointer", border: `1px solid ${form.equipment.van === s ? C.accent : C.border}`,
-              background: form.equipment.van === s ? "rgba(0,149,246,0.1)" : C.white,
-              color: form.equipment.van === s ? C.accent : C.text, transition: "all 200ms",
+              flex: 1, padding: "8px 0", borderRadius: 8, fontSize: 12, fontWeight: 500,
+              fontFamily: C.font, cursor: "pointer",
+              border: `1px solid ${form.equipment.van === s ? C.text : C.border}`,
+              background: form.equipment.van === s ? C.text : C.white,
+              color: form.equipment.van === s ? C.white : C.text,
+              transition: "all 150ms",
             }}>{s.charAt(0).toUpperCase() + s.slice(1)}</button>
           ))}
         </div>

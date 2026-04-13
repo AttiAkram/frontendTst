@@ -12,14 +12,14 @@ export function Chip({ label, icon: Icon, active = false, onClick }: Props) {
   return (
     <button onClick={onClick} style={{
       display: "inline-flex", alignItems: "center", gap: 4,
-      padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 500,
+      padding: "6px 12px", borderRadius: 18, fontSize: 12, fontWeight: 500,
       fontFamily: C.font, cursor: "pointer", whiteSpace: "nowrap",
-      background: active ? C.accent : C.white,
+      background: active ? C.text : C.white,
       color: active ? C.white : C.text,
-      border: `1px solid ${active ? C.accent : C.border}`,
-      transition: "all 200ms",
+      border: `1px solid ${active ? C.text : C.border}`,
+      transition: "all 150ms",
     }}>
-      {Icon && <Icon size={13} />}
+      {Icon && <Icon size={12} />}
       {label}
     </button>
   )

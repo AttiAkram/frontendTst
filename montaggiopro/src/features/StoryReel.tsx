@@ -8,16 +8,14 @@ interface Props { teams: Team[] }
 function Story({ team, delay }: { team: Team; delay: number }) {
   const [visible, setVisible] = useState(false)
   useEffect(() => { const t = setTimeout(() => setVisible(true), delay); return () => clearTimeout(t) }, [delay])
-
   return (
     <div style={{
       display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-      opacity: visible ? 1 : 0, transform: `translateY(${visible ? 0 : 10}px)`,
-      transition: "opacity 300ms, transform 300ms",
+      opacity: visible ? 1 : 0, transition: "opacity 200ms",
     }}>
-      <Avatar char={team.char} colors={team.colors} size={52} ring />
+      <Avatar char={team.char} colors={team.colors} size={44} ring />
       <div style={{
-        fontSize: 11, color: C.text, fontFamily: C.font, width: 64,
+        fontSize: 10, color: C.sub, fontFamily: C.font, width: 56,
         textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
       }}>{team.name.split(" ")[0]}</div>
     </div>
@@ -27,10 +25,10 @@ function Story({ team, delay }: { team: Team; delay: number }) {
 export function StoryReel({ teams }: Props) {
   return (
     <div style={{
-      display: "flex", gap: 18, overflowX: "auto", padding: "12px 16px",
-      background: C.white, borderRadius: 12, border: `1px solid ${C.border}`, marginBottom: 16,
+      display: "flex", gap: 14, overflowX: "auto", padding: "10px 12px",
+      background: C.white, borderRadius: 12, marginBottom: 12,
     }}>
-      {teams.map((t, i) => <Story key={t.id} team={t} delay={i * 80} />)}
+      {teams.map((t, i) => <Story key={t.id} team={t} delay={i * 60} />)}
     </div>
   )
 }

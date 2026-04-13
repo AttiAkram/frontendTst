@@ -6,7 +6,7 @@ import type { LucideIcon } from "lucide-react"
 interface Props { page: string; onPage: (p: string) => void; role: Role }
 
 const NAV_SQUADRA: [LucideIcon, string, string][] = [
-  [Home, "Feed", "feed"], [Briefcase, "Bacheca", "bacheca"],
+  [Home, "Home", "feed"], [Briefcase, "Lavori", "bacheca"],
   [MessageCircle, "Messaggi", "messages"], [User, "Profilo", "profile"],
 ]
 const NAV_NEGOZIO: [LucideIcon, string, string][] = [
@@ -17,7 +17,7 @@ const NAV_NEGOZIO: [LucideIcon, string, string][] = [
 export function BottomNav({ page, onPage, role }: Props) {
   const items = role === "squadra" ? NAV_SQUADRA : NAV_NEGOZIO
   return (
-    <div style={{
+    <nav style={{
       position: "fixed", bottom: 0, left: 0, right: 0,
       background: C.white, borderTop: `1px solid ${C.border}`,
       display: "flex", justifyContent: "space-around", zIndex: 100,
@@ -26,14 +26,14 @@ export function BottomNav({ page, onPage, role }: Props) {
       {items.map(([Icon, label, key]) => (
         <button key={key} onClick={() => onPage(key)} style={{
           display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
-          padding: "8px 0", border: "none", background: "transparent", cursor: "pointer",
-          color: page === key ? C.accent : C.sub, fontSize: 10, fontFamily: C.font,
+          padding: "6px 0", border: "none", background: "transparent", cursor: "pointer",
+          color: page === key ? C.text : C.sub, fontSize: 9, fontWeight: 500, fontFamily: C.font,
           flex: 1,
         }}>
-          <Icon size={22} strokeWidth={page === key ? 2.5 : 2} />
+          <Icon size={20} strokeWidth={page === key ? 2.5 : 1.5} />
           {label}
         </button>
       ))}
-    </div>
+    </nav>
   )
 }
