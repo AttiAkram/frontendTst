@@ -1,52 +1,98 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
-import { API_BASE, AUTH_STORAGE_KEY } from "../config/api"
-import { EP } from "../config/api"
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react"
+import { API_BASE, TOKEN_KEY, REFRESH_KEY, EP } from "../config/api"
+import { DjangoUser } from "../types"
 
-interface User { email: string; name: string }
+interface LoginPayload    { email: string; password: string }
+interface RegisterPayload { email: string; password: string; first_name: string; last_name: string; birthday: string; sex: "Male" | "Female" }
 
-interface AuthCtxValue {
-  user: User | null
-  loading: boolean
-  login: (email: string, pass: string) => Promise<void>
-  logout: () => Promise<void>
+interface AuthCtxType {
+  user:     DjangoUser | null
+  loading:  boolean
+  login:    (p: LoginPayload)    => Promise<DjangoUser>
+  logout:   ()                   => Promise<void>
+  register: (p: RegisterPayload) => Promise<void>
+  refresh:  ()                   => Promise<boolean>
 }
 
-const Ctx = createContext<AuthCtxValue>(null!)
-export const useAuth = () => useContext(Ctx)
+const AuthCtx = createContext<AuthCtxType | null>(null)
+export const useAuth = () => useContext(AuthCtx)!
+
+function getCookie(name: string): string | null {
+  const m = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`))
+  return m ? decodeURIComponent(m[2]) : null
+}
+
+async function apiFetch(path: string, method = "GET", body?: unknown) {
+  const token = localStorage.getItem(TOKEN_KEY)
+  const csrf  = getCookie("csrftoken")
+  const h: Record<string, string> = { "Content-Type": "application/json", "Accept": "application/json" }
+  if (token)              h["Authorization"] = `Bearer ${token}`
+  if (csrf && method !== "GET") h["X-CSRFToken"] = csrf
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers:     h,
+    credentials: "include",
+    body:        body !== undefined ? JSON.stringify(body) : undefined,
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.detail ?? err.email?.[0] ?? err.password?.[0] ?? `HTTP ${res.status}`)
+  }
+  if (res.status === 204) return null
+  return res.json()
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [user,    setUser]    = useState<DjangoUser | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const login = useCallback(async (email: string, pass: string) => {
-    setLoading(true)
-    try {
-      const res = await fetch(`${API_BASE}${EP.login}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password: pass }),
-      })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const data = await res.json()
-      localStorage.setItem(AUTH_STORAGE_KEY, data.token)
-      setUser({ email, name: data.name })
-    } finally {
-      setLoading(false)
-    }
+  useEffect(() => {
+    const token = localStorage.getItem(TOKEN_KEY)
+    if (!token) { setLoading(false); return }
+    apiFetch(EP.me)
+      .then(setUser)
+      .catch(() => localStorage.removeItem(TOKEN_KEY))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const login = useCallback(async ({ email, password }: LoginPayload) => {
+    const data = await apiFetch(EP.login, "POST", { email, password })
+    localStorage.setItem(TOKEN_KEY,   data.access_token)
+    localStorage.setItem(REFRESH_KEY, data.refresh_token)
+    const me = await apiFetch(EP.me)
+    setUser(me)
+    return me as DjangoUser
   }, [])
 
   const logout = useCallback(async () => {
-    const token = localStorage.getItem(AUTH_STORAGE_KEY)
-    try {
-      await fetch(`${API_BASE}${EP.logout}`, {
-        method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
-    } finally {
-      localStorage.removeItem(AUTH_STORAGE_KEY)
-      setUser(null)
-    }
+    await apiFetch(EP.logout, "DELETE").catch(() => {})
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(REFRESH_KEY)
+    setUser(null)
   }, [])
 
-  return <Ctx.Provider value={{ user, loading, login, logout }}>{children}</Ctx.Provider>
+  const register = useCallback(async (payload: RegisterPayload) => {
+    await apiFetch(EP.register, "POST", payload)
+    // Il backend manda email di conferma — l'utente deve confermare prima del login
+  }, [])
+
+  const refresh = useCallback(async (): Promise<boolean> => {
+    const rt = localStorage.getItem(REFRESH_KEY)
+    if (!rt) return false
+    try {
+      const data = await apiFetch(EP.refreshToken, "POST", { refresh: rt })
+      localStorage.setItem(TOKEN_KEY, data.access)
+      return true
+    } catch {
+      logout()
+      return false
+    }
+  }, [logout])
+
+  return (
+    <AuthCtx.Provider value={{ user, loading, login, logout, register, refresh }}>
+      {children}
+    </AuthCtx.Provider>
+  )
 }

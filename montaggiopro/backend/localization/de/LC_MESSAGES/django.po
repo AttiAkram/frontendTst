@@ -1,0 +1,198 @@
+# German language
+# Copyright (C) MuseoDiRisorgimento
+# This file is distributed under the same license as the PACKAGE package.
+# Semykopenko Ihor <aufrutten@gmail.com>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-07-04 22:19+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Semykopenko Ihor <aufrutten@gmail.com>\n"
+"Language-Team: Deutsche Sprache <aufrutten@gmail.com>\n"
+"Language: Deutsche\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: apps/accounts/models/user.py:46
+msgid "Male"
+msgstr "Männlich"
+
+#: apps/accounts/models/user.py:47
+msgid "Female"
+msgstr "Weiblich"
+
+#: apps/accounts/models/user.py:58 apps/accounts/serializers/OAuth2.py:17
+#: apps/accounts/serializers/serializers.py:20
+msgid "Email address"
+msgstr "E-Mail-Adresse"
+
+#: apps/accounts/models/user.py:59 apps/accounts/serializers/account.py:31
+#: apps/accounts/serializers/auth.py:13
+#: apps/accounts/serializers/serializers.py:50
+msgid "Password"
+msgstr "Passwort"
+
+#: apps/accounts/models/user.py:60
+msgid "Last login"
+msgstr "Letzte Anmeldung"
+
+#: apps/accounts/models/user.py:61
+msgid "Date joined"
+msgstr "Registrierungsdatum"
+
+#: apps/accounts/models/user.py:62
+msgid "Last password update"
+msgstr "Letzte Passwortänderung"
+
+#: apps/accounts/models/user.py:63
+msgid "Last email received"
+msgstr "Letzte erhaltene E-Mail"
+
+#: apps/accounts/models/user.py:65
+msgid "Photo profile"
+msgstr "Profilfoto"
+
+#: apps/accounts/models/user.py:66
+msgid "First name"
+msgstr "Vorname"
+
+#: apps/accounts/models/user.py:67
+msgid "Last name"
+msgstr "Nachname"
+
+#: apps/accounts/models/user.py:68
+msgid "Birthday"
+msgstr "Geburtstag"
+
+#: apps/accounts/models/user.py:69
+msgid "Sex"
+msgstr "Geschlecht"
+
+#: apps/accounts/models/user.py:99
+msgid "{} Confirm email ownership"
+msgstr "{} E-Mail-Eigentum bestätigen"
+
+#: apps/accounts/models/user.py:106
+msgid "{} Reset your password"
+msgstr "{} Passwort zurücksetzen"
+
+#: apps/accounts/serializers/OAuth2.py:18
+#: apps/accounts/serializers/serializers.py:91
+msgid "Access token"
+msgstr "Zugriffstoken"
+
+#: apps/accounts/serializers/OAuth2.py:19
+msgid "Access token from social provider"
+msgstr "Zugriffstoken vom sozialen Anbieter"
+
+#: apps/accounts/serializers/OAuth2.py:33
+msgid "Client id"
+msgstr "Client-ID"
+
+#: apps/accounts/serializers/OAuth2.py:33
+msgid "Client id of app"
+msgstr "Client-ID der App"
+
+#: apps/accounts/serializers/auth.py:19
+msgid "The password you provided is incorrect"
+msgstr "Das angegebene Passwort ist falsch"
+
+#: apps/accounts/serializers/serializers.py:27
+msgid "Unfortunately, the email address you provided was not found"
+msgstr "Leider wurde die angegebene E-Mail-Adresse nicht gefunden"
+
+#: apps/accounts/serializers/serializers.py:30
+msgid "Account is not yet activated, please confirm your email"
+msgstr "Konto ist noch nicht aktiviert, bitte bestätigen Sie Ihre E-Mail"
+
+#: apps/accounts/serializers/serializers.py:42
+msgid ""
+"Cannot send reset link too frequently. Check your email or wait before "
+"requesting another one."
+msgstr ""
+"Passwortrücksetzlink kann nicht zu häufig gesendet werden. Überprüfen Sie Ihre E-Mail oder warten Sie, bevor Sie einen weiteren anfordern."
+
+#: apps/accounts/serializers/serializers.py:66
+msgid "User ID"
+msgstr "Benutzer-ID"
+
+#: apps/accounts/serializers/serializers.py:74
+msgid "Invalid user ID"
+msgstr "Ungültige Benutzer-ID"
+
+#: apps/accounts/serializers/serializers.py:80
+msgid "Token"
+msgstr "Token"
+
+#: apps/accounts/serializers/serializers.py:85
+msgid "Invalid token"
+msgstr "Ungültiges Token"
+
+#: apps/accounts/serializers/serializers.py:92
+msgid "Refresh token"
+msgstr "Aktualisierungstoken"
+
+#: apps/accounts/validators.py:13
+msgid "Sorry, but this email address is already linked to another account."
+msgstr "Entschuldigung, aber diese E-Mail-Adresse ist bereits mit einem anderen Konto verknüpft."
+
+#: apps/accounts/validators.py:22
+msgid "Your age is below the minimum required {} year olds."
+msgstr "Ihr Alter liegt unter dem Mindestalter von {} Jahren."
+
+#: apps/accounts/validators.py:24
+msgid "Sorry, but you need to be under the age of {} year olds."
+msgstr "Entschuldigung, aber Sie müssen unter {} Jahren alt sein."
+
+#: apps/books/serializers.py:25
+msgid "Author does not exist"
+msgstr "Autor existiert nicht"
+
+#: apps/books/serializers.py:31
+msgid "Category does not exist"
+msgstr "Kategorie existiert nicht"
+
+#: apps/books/serializers.py:37
+msgid "City does not exist"
+msgstr "Stadt existiert nicht"
+
+#: apps/books/serializers.py:43 apps/subsections/serializers.py:19
+msgid "Legend does not exist"
+msgstr "Legende existiert nicht"
+
+#: apps/books/serializers.py:49
+msgid "Subsection does not exist"
+msgstr "Unterabschnitt existiert nicht"
+
+#: apps/books/serializers.py:57
+#, python-brace-format
+msgid "Error loading PDF: {e}"
+msgstr "Fehler beim Laden des PDFs: {e}"
+
+#: apps/categories/models.py:14
+msgid "Category"
+msgstr "Kategorie"
+
+#: apps/categories/models.py:15
+msgid "Categories"
+msgstr "Kategorien"
+
+#: apps/cities/models.py:14
+msgid "City"
+msgstr "Stadt"
+
+#: apps/cities/models.py:15
+msgid "Cities"
+msgstr "Städte"
+
+#: backend/components/OAuth2/backends.py:53
+msgid "Invalid read extract date of birth from google account"
+msgstr "Ungültiges Auslesen des Geburtsdatums aus dem Google-Konto"
+
+#: backend/components/OAuth2/backends.py:61
+msgid "Invalid read extract sex from google account"
+msgstr "Ungültiges Auslesen des Geschlechts aus dem Google-Konto"

@@ -1,20 +1,21 @@
 import { useState, useEffect } from "react"
 
-type Breakpoint = "mobile" | "desktop" | "wide"
-
-function getBreakpoint(): Breakpoint {
-  const w = window.innerWidth
-  if (w < 768) return "mobile"
-  if (w < 1200) return "desktop"
-  return "wide"
-}
+export type Breakpoint = "mobile" | "tablet" | "desktop"
 
 export function useBreakpoint(): Breakpoint {
-  const [bp, setBp] = useState(getBreakpoint)
+  const [w, setW] = useState(() => window.innerWidth)
+
   useEffect(() => {
-    const handler = () => setBp(getBreakpoint())
-    window.addEventListener("resize", handler)
-    return () => window.removeEventListener("resize", handler)
+    const h = () => setW(window.innerWidth)
+    window.addEventListener("resize", h)
+    return () => window.removeEventListener("resize", h)
   }, [])
-  return bp
+
+  if (w < 600)  return "mobile"
+  if (w < 1024) return "tablet"
+  return "desktop"
 }
+
+export const isMobile  = (bp: Breakpoint) => bp === "mobile"
+export const isTablet  = (bp: Breakpoint) => bp === "tablet"
+export const isDesktop = (bp: Breakpoint) => bp === "desktop"

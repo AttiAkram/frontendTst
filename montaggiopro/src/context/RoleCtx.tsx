@@ -1,10 +1,5 @@
 import { createContext, useContext } from "react"
-import type { Role } from "../types"
+import { Role } from "../types"
 
-interface RoleCtxValue {
-  role: Role
-  setRole: (r: Role) => void
-}
-
-export const RoleCtx = createContext<RoleCtxValue>({ role: "squadra", setRole: () => {} })
+export const RoleCtx = createContext<Role>("squadra")
 export const useRole = () => useContext(RoleCtx)

@@ -2,39 +2,27 @@ import { Check } from "lucide-react"
 import { C } from "../tokens"
 
 interface Props {
-  char: string
-  colors: [string, string]
-  size?: number
-  ring?: boolean
-  verified?: boolean
+  char:     string
+  colors:   [string, string]
+  size?:    number
+  ring?:    boolean
+  verified?:boolean
 }
 
-export function Avatar({ char, colors, size = 32, ring = false, verified = false }: Props) {
+export function Avatar({ char, colors, size = 36, ring = false, verified = false }: Props) {
+  const [c1, c2] = colors
+  const pad = ring ? 2 : 0
+
   return (
-    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
-      {ring && (
-        <div style={{
-          position: "absolute", inset: -2, borderRadius: "50%",
-          border: `2px solid ${C.sub}`,
-        }} />
-      )}
-      <div style={{
-        width: size, height: size, borderRadius: "50%",
-        background: colors[0],
-        display: "flex", alignItems: "center", justifyContent: "center",
-        color: C.white, fontWeight: 600, fontSize: Math.round(size * 0.38),
-        fontFamily: C.font,
-      }}>
-        {char}
+    <div style={{ position:"relative", width:size+pad*2, height:size+pad*2, flexShrink:0 }}>
+      <div style={{ width:"100%", height:"100%", borderRadius:"50%", background:ring?"linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366)":"transparent", padding:pad }}>
+        <div style={{ width:size, height:size, borderRadius:"50%", background:`linear-gradient(135deg,${c1},${c2})`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:size*.38, fontWeight:700, color:"#fff" }}>
+          {char}
+        </div>
       </div>
       {verified && (
-        <div style={{
-          position: "absolute", bottom: -1, right: -1, zIndex: 2,
-          width: Math.round(size * 0.32), height: Math.round(size * 0.32), borderRadius: "50%",
-          background: C.text, display: "flex", alignItems: "center", justifyContent: "center",
-          border: `1.5px solid ${C.white}`,
-        }}>
-          <Check size={Math.round(size * 0.18)} color={C.white} strokeWidth={3} />
+        <div style={{ position:"absolute", bottom:0, right:0, width:16, height:16, background:C.accent, borderRadius:"50%", border:`2px solid ${C.white}`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <Check size={9} color="#fff" />
         </div>
       )}
     </div>

@@ -1,10 +1,10 @@
 import { createContext, useContext } from "react"
-import type { Profile } from "../types"
+import { Profile } from "../types"
 
-interface ProfileCtxValue {
-  profile: Profile
+interface ProfileCtxType {
+  profile:       Profile
   updateProfile: (p: Profile) => void
 }
 
-export const ProfileCtx = createContext<ProfileCtxValue>(null!)
-export const useProfile = () => useContext(ProfileCtx)
+export const ProfileCtx = createContext<ProfileCtxType | null>(null)
+export const useProfile = () => useContext(ProfileCtx)!

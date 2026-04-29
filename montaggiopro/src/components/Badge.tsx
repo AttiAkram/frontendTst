@@ -1,22 +1,18 @@
-import type { LucideIcon } from "lucide-react"
+import { LucideIcon } from "lucide-react"
 import { C } from "../tokens"
 
 interface Props {
-  label: string
-  icon?: LucideIcon
+  label:  string
+  icon?:  LucideIcon
   color?: string
-  bg?: string
+  bg?:    string
 }
 
-export function Badge({ label, icon: Icon, color = C.sub, bg = C.bg }: Props) {
+export function Badge({ label, icon: Icon, color = C.sub, bg = C.white }: Props) {
   return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 4,
-      padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 500,
-      color, background: bg, fontFamily: C.font,
-    }}>
+    <div style={{ display:"inline-flex", alignItems:"center", gap:3, padding:"3px 8px", borderRadius:6, background:bg, border:`1px solid ${C.border}`, fontSize:11, color, fontWeight:500, whiteSpace:"nowrap" }}>
       {Icon && <Icon size={11} />}
       {label}
-    </span>
+    </div>
   )
 }

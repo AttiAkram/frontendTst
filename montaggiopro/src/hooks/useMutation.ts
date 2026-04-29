@@ -1,33 +1,34 @@
 import { useState, useCallback } from "react"
-import { API_BASE, AUTH_STORAGE_KEY } from "../config/api"
+import { API_BASE } from "../config/api"
+import { buildHeaders } from "./useQuery"
 
-interface MutationResult<T> {
-  mutate: (body?: unknown) => Promise<T>
-  loading: boolean
-  error: string | null
-}
+type Method = "POST" | "PUT" | "PATCH" | "DELETE"
 
-export function useMutation<T>(endpoint: string, method: "POST" | "PUT" | "DELETE" = "POST"): MutationResult<T> {
+export function useMutation<T = unknown>(
+  endpoint: string,
+  method: Method = "POST",
+) {
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error,   setError]   = useState<string | null>(null)
 
   const mutate = useCallback(async (body?: unknown): Promise<T> => {
     setLoading(true)
     setError(null)
     try {
-      const token = localStorage.getItem(AUTH_STORAGE_KEY)
-      const headers: Record<string, string> = { "Content-Type": "application/json" }
-      if (token) headers["Authorization"] = `Bearer ${token}`
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method,
-        headers,
-        body: body ? JSON.stringify(body) : undefined,
+        headers:     buildHeaders(method),
+        credentials: "include",
+        body:        body !== undefined ? JSON.stringify(body) : undefined,
       })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const json = await res.json()
-      return json as T
-    } catch (e) {
-      const msg = (e as Error).message
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.detail ?? err.message ?? `HTTP ${res.status}`)
+      }
+      if (res.status === 204) return undefined as T
+      return await res.json() as T
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Errore sconosciuto"
       setError(msg)
       throw e
     } finally {
