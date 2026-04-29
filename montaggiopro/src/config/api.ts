@@ -1,27 +1,17 @@
-// ─────────────────────────────────────────────────────────
-// Backend: Django 4.2 + DRF (BetaModena)
-// Dev:  http://api.localhost  (Docker Compose)
-// Prod: https://api.tuodominio.com
-//
-// Auth: JWT Bearer token (header) +
-//       Session cookie (CORS credentials) +
-//       CSRF token (X-CSRFToken header su POST/PUT/DELETE)
-// ─────────────────────────────────────────────────────────
-
 export const API_BASE         = import.meta.env.VITE_API_BASE ?? "http://api.localhost"
 export const TOKEN_KEY        = "mp_access"
 export const REFRESH_KEY      = "mp_refresh"
 
 export const EP = {
-  // ── Auth — endpoint reali ─────────────────────────────
-  login:           "/accounts/auth",          // POST { email, password }
-  logout:          "/accounts/auth",          // DELETE
-  register:        "/accounts/create",        // POST { email, password, first_name, last_name, birthday, sex }
-  confirmEmail:    "/accounts/confirm",       // POST { uid, token }
-  forgotPassword:  "/accounts/reset-password",// POST { email }
-  resetPassword:   "/accounts/reset-password",// PUT  { uid, token, password }
-  refreshToken:    "/accounts/token/refresh", // POST { refresh }
-  me:              "/accounts/me",            // GET | PUT | DELETE
+  // ── Auth ──────────────────────────────────────────────
+  login:           "/accounts/auth",
+  logout:          "/accounts/auth",
+  register:        "/accounts/create",
+  confirmEmail:    "/accounts/confirm",
+  forgotPassword:  "/accounts/reset-password",
+  resetPassword:   "/accounts/reset-password",
+  refreshToken:    "/accounts/token/refresh",
+  me:              "/accounts/me",
   socialAuth: (backend: string) => `/accounts/auth/${backend}`,
 
   // ── Risorse esistenti (DRF SimpleRouter) ─────────────
@@ -34,9 +24,7 @@ export const EP = {
   legends:      "/legends",
   subsections:  "/subsections",
 
-  // ── API MontaggioPro — da implementare nel backend ────
-  // I modelli Django sono già stati creati (scaffold in /backend/apps/)
-  // Questi endpoint usano dati mock finché le view non sono attive
+  // ── Teams ─────────────────────────────────────────────
   teams:              "/teams",
   team:        (id: number) => `/teams/${id}`,
   followTeam:  (id: number) => `/teams/${id}/follow`,
@@ -44,21 +32,24 @@ export const EP = {
   teamReviews: (id: number) => `/teams/${id}/reviews`,
   teamAvail:   (id: number) => `/teams/${id}/availability`,
 
+  // ── Feed (Posts) ──────────────────────────────────────
   feed:               "/feed",
-  likePost:    (id: number) => `/posts/${id}/like`,
-  savePost:    (id: number) => `/posts/${id}/save`,
+  likePost:    (id: number) => `/feed/${id}/like`,
+  savePost:    (id: number) => `/feed/${id}/save`,
+  postComments:(id: number) => `/feed/${id}/comments`,
 
+  // ── Jobs ──────────────────────────────────────────────
   jobs:               "/jobs",
   job:         (id: number) => `/jobs/${id}`,
   applyJob:    (id: number) => `/jobs/${id}/apply`,
-  myJobs:             "/me/jobs",
+  myJobs:             "/jobs/mine",
 
+  // ── Reviews ───────────────────────────────────────────
+  reviews:            "/reviews",
+  review:      (id: number) => `/reviews/${id}`,
+
+  // ── Conversations / Messages ──────────────────────────
   conversations:          "/conversations",
   conversation:  (id: number) => `/conversations/${id}`,
   sendMessage:   (id: number) => `/conversations/${id}/messages`,
-
-  myAvailability:      "/me/availability",
-  updateAvailability:  "/me/availability",
-  notifSettings:       "/me/settings/notifications",
-  privacySettings:     "/me/settings/privacy",
 } as const

@@ -52,4 +52,9 @@ urlpatterns += [
     path('cities/', include('apps.cities.urls', namespace='cities')),
     path('legends/', include('apps.legends.urls', namespace='legends')),
     path('subsections/', include('apps.subsections.urls', namespace='subsections')),
+    path('teams/', include('apps.teams.urls', namespace='teams')),
+    path('jobs/', include('apps.jobs.urls', namespace='jobs')),
+    path('feed/', include('apps.feed.urls', namespace='feed')),
+    path('reviews/', include('apps.reviews.urls', namespace='reviews')),
+    path('conversations/', include('apps.messages.urls', namespace='messages')),
 ]
