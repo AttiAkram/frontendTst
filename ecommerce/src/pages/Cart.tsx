@@ -7,7 +7,8 @@ import { ShippingEstimator } from '../components/Shipping'
 import { Btn, Rule, SectionHead } from '../components/ui'
 import { PRODUCT_BY_ID } from '../data/catalog'
 import { money } from '../lib/format'
-import { bestCoupon, cartTotals, useStore } from '../store/store'
+import { FREE_SHIP, bestCoupon, cartTotals, useStore } from '../store/store'
+import { Track } from '../components/Signal'
 import { ExpressPay } from './Checkout'
 
 export function Cart() {
@@ -91,20 +92,25 @@ export function Cart() {
 
         <aside className="summary">
           <p className="mono up small muted">Riepilogo</p>
+          {/* Free-shipping line: fills toward the threshold, the ring closes when it's unlocked. */}
+          <Track
+            className="freeship"
+            tone={t.subtotal >= FREE_SHIP ? 'account' : 'cart'}
+            value={t.subtotal / FREE_SHIP}
+            label={t.subtotal >= FREE_SHIP ? 'Spedizione gratuita sbloccata' : `Aggiungi ${money(FREE_SHIP - t.subtotal)} per la spedizione gratuita`}
+            aside={`${money(Math.min(t.subtotal, FREE_SHIP))} / ${FREE_SHIP} €`}
+            ariaLabel="Progresso verso la spedizione gratuita"
+          />
           {ext.coupons && (
-            <div className={`couponscan couponscan--${scan}`}>
-              {scan === 'idle' && <span className="small muted">Nessun coupon disponibile per questi articoli.</span>}
-              {scan === 'scanning' && (
-                <span className="small">
-                  <span className="spinner" /> Cerco coupon tra 38 codici…
-                </span>
-              )}
-              {scan === 'done' && coupon && (
-                <span className="small">
-                  <b className="mono">{coupon.code}</b> applicato · −{coupon.off}%
-                </span>
-              )}
-            </div>
+            <Track
+              className="couponsig"
+              size="sm"
+              loading={scan === 'scanning'}
+              tone={scan === 'done' ? 'account' : 'ink'}
+              value={scan === 'done' ? 1 : 0}
+              label={scan === 'scanning' ? 'Cerco coupon tra 38 codici…' : scan === 'done' && coupon ? `${coupon.code} applicato · −${coupon.off}%` : 'Nessun coupon per questi articoli'}
+              aside={scan === 'done' && coupon ? `−${money(t.discount)}` : undefined}
+            />
           )}
           <dl className="summary__rows">
             <div>
@@ -119,7 +125,7 @@ export function Cart() {
             )}
             <div>
               <dt>Spedizione</dt>
-              <dd className="mono">{t.subtotal >= 39 ? 'GRATIS' : 'al checkout'}</dd>
+              <dd className="mono">{t.subtotal >= FREE_SHIP ? 'GRATIS' : 'al checkout'}</dd>
             </div>
           </dl>
           <Rule variant="dashdot" />

@@ -1,9 +1,10 @@
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react'
 import { Bell, Check, ChevronDown, Heart, MessageCircle, Minus, Plus, Scale, ShieldCheck, ShoppingBag, ThumbsUp, Truck, Undo2, Zap } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getProduct } from '../api/client'
-import { DealMeter, PriceHistory, RatingBars, ReviewEvolution } from '../components/Charts'
+import { PriceHistory, RatingBars, ReviewEvolution } from '../components/Charts'
+import { Track } from '../components/Signal'
 import { Photo } from '../components/Photo'
 import { ProductCard } from '../components/ProductCard'
 import { ShippingEstimator } from '../components/Shipping'
@@ -46,7 +47,9 @@ export function Product() {
 function ProductView({ product: p, reviews, questions, similar }: Data) {
   const nav = useNavigate()
   const ext = useStore((s) => s.extensions)
-  const wished = useStore((s) => s.wishlist.some((w) => w.id === p.id))
+  const wish = useStore((s) => s.wishlist.find((w) => w.id === p.id))
+  const wished = !!wish
+  const compareCount = useStore((s) => s.compare.length)
   const inCompare = useStore((s) => s.compare.includes(p.id))
   const alert = useStore((s) => s.alerts.find((a) => a.id === p.id))
   const { addToCart, toggleWish, toggleCompare, setAlert } = useStore.getState()
@@ -125,13 +128,7 @@ function ProductView({ product: p, reviews, questions, similar }: Data) {
               {money(p.price / p.unit.amount)} / {p.unit.label}
             </p>
           )}
-          {ext.priceHistory && (
-            <div className="buybox__deal">
-              <span className="mono small muted">Affare</span>
-              <DealMeter score={score} />
-              <span className="mono small">{score}/100</span>
-            </div>
-          )}
+          {ext.priceHistory && <PriceRange p={p} />}
           {ext.coupons && p.coupon && (
             <div className="coupon">
               <span className="coupon__code mono">{p.coupon.code}</span>
@@ -166,22 +163,43 @@ function ProductView({ product: p, reviews, questions, similar }: Data) {
                 <Plus size={14} />
               </button>
             </div>
-            <span className={`small ${p.stock < 6 ? 'bad' : 'ok'}`}>{p.stock < 6 ? `● Solo ${p.stock} rimasti` : '● Disponibile'}</span>
+            <Track
+              className="buybox__stock"
+              size="sm"
+              goal={false}
+              tone={p.stock < 6 ? 'bad' : 'account'}
+              value={Math.min(1, p.stock / 60)}
+              label={<span className={p.stock < 6 ? 'bad' : 'ok'}>{p.stock < 6 ? `Solo ${p.stock} rimasti` : 'Disponibile'}</span>}
+              aside={p.stock < 6 ? 'scorte in esaurimento' : `${p.stock > 60 ? '60+' : p.stock} pezzi`}
+              ariaLabel="Disponibilità"
+            />
           </div>
 
+          <Cutoff fast={p.fastShipping} />
+
           <div className="buybox__cta">
-            <Btn tone="cart" size="lg" block icon={<ShoppingBag size={16} />} onClick={() => addToCart(p.id, variant.id, qty)}>
-              Aggiungi al carrello
-            </Btn>
-            <Btn tone="buy" size="lg" block icon={<Zap size={16} />} onClick={buyNow}>
+            <CartButton id={p.id} variant={variant.id} qty={qty} />
+            <Btn tone="buy" size="lg" block icon={<Zap size={16} />} onClick={buyNow} sub={`Arriva ${deliveryLabel(p.fastShipping)}`}>
               Compra ora
             </Btn>
             <div className="buybox__minor">
-              <Btn tone="fav" active={wished} icon={<Heart size={15} fill={wished ? 'currentColor' : 'none'} />} onClick={() => toggleWish(p.id)}>
-                {wished ? 'Nei preferiti' : 'Preferiti'}
+              <Btn
+                tone="fav"
+                active={wished}
+                icon={<Heart size={15} fill={wished ? 'currentColor' : 'none'} />}
+                onClick={() => toggleWish(p.id)}
+                sub={wished && wish ? priceDelta(wish.addedPrice, p.price) : 'Ti avvisiamo se cala'}
+              >
+                {wished ? 'Salvato' : 'Preferiti'}
               </Btn>
               {ext.compare && (
-                <Btn active={inCompare} icon={<Scale size={15} />} onClick={() => toggleCompare(p.id)}>
+                <Btn
+                  active={inCompare}
+                  icon={<Scale size={15} />}
+                  onClick={() => toggleCompare(p.id)}
+                  sub={`${compareCount}/4 nel confronto`}
+                  progress={compareCount / 4}
+                >
                   {inCompare ? 'In confronto' : 'Confronta'}
                 </Btn>
               )}
@@ -315,6 +333,8 @@ function TabBar() {
     ['domande', 'Domande'],
   ]
   const [active, setActive] = useState('panoramica')
+  const { scrollYProgress } = useScroll()
+  const progress = useSpring(scrollYProgress, { stiffness: 200, damping: 40 })
   useEffect(() => {
     const io = new IntersectionObserver((entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id)), { rootMargin: '-40% 0px -55% 0px' })
     tabs.forEach(([id]) => {
@@ -334,6 +354,8 @@ function TabBar() {
           </a>
         ))}
       </div>
+      {/* Whole-page reading progress: where you are on this product. */}
+      <motion.span className="tabbar__progress" style={{ scaleX: progress }} />
     </nav>
   )
 }
@@ -519,7 +541,7 @@ function Reviews({ p, reviews }: { p: P; reviews: Review[] }) {
             {list.length === 0 && <p className="small muted">Nessuna recensione con questi filtri.</p>}
           </div>
           {shown < list.length && (
-            <Btn onClick={() => setShown((s) => s + 6)} block>
+            <Btn onClick={() => setShown((s) => s + 6)} block sub={`${shown} di ${list.length} lette`} progress={shown / list.length}>
               Mostra altre {Math.min(6, list.length - shown)}
             </Btn>
           )}
@@ -695,5 +717,102 @@ function ProductSkeleton() {
         ))}
       </div>
     </div>
+  )
+}
+
+/** Where today's price sits between the 12-month low and high (avg marked). */
+function PriceRange({ p }: { p: P }) {
+  const { min, max, avg } = priceStats(p, 365)
+  const span = max - min || 1
+  const at = (p.price - min) / span
+  const tone = at < 0.34 ? 'account' : at > 0.66 ? 'bad' : 'ink'
+  const verdict = at < 0.15 ? 'Vicino al minimo storico' : at < 0.34 ? 'Buon prezzo' : at > 0.66 ? 'Prezzo alto: conviene aspettare' : 'Nella media'
+  return (
+    <Track
+      className="pricerange"
+      value={at}
+      tone={tone}
+      goal={false}
+      marks={[{ at: (avg - min) / span, label: `media ${money(avg)}`, done: false }]}
+      label={verdict}
+      aside={`${money(min)} — ${money(max)}`}
+      ariaLabel="Prezzo attuale rispetto agli ultimi 12 mesi"
+    />
+  )
+}
+
+/** Countdown to the order cutoff: the line empties as the time left for next-day delivery runs out. */
+function Cutoff({ fast }: { fast: boolean }) {
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 30_000)
+    return () => clearInterval(t)
+  }, [])
+  const start = new Date(now)
+  start.setHours(8, 0, 0, 0)
+  const end = new Date(now)
+  end.setHours(18, 0, 0, 0)
+  const left = end.getTime() - now.getTime()
+  const open = left > 0 && now >= start
+  const h = Math.floor(left / 3_600_000)
+  const m = Math.floor((left % 3_600_000) / 60_000)
+  return (
+    <Track
+      size="sm"
+      goal={false}
+      tone={open ? 'buy' : 'ink'}
+      value={open ? left / (end.getTime() - start.getTime()) : 0}
+      label={open ? `Ordina entro ${h ? `${h} h ` : ''}${m} min` : 'Ordini chiusi per oggi'}
+      aside={open ? `arriva ${deliveryLabel(fast)}` : `arriva ${deliveryLabel(fast, 1)}`}
+      ariaLabel="Tempo rimasto per la consegna più rapida"
+    />
+  )
+}
+
+function deliveryLabel(fast: boolean, extra = 0) {
+  const d = new Date()
+  let add = (fast ? 1 : 3) + extra
+  while (add > 0) {
+    d.setDate(d.getDate() + 1)
+    if (d.getDay() !== 0) add--
+  }
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const date = d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'short' })
+  return d.toDateString() === tomorrow.toDateString() ? `domani, ${date}` : date
+}
+
+function priceDelta(then: number, now: number) {
+  const d = Math.round(((now - then) / then) * 100)
+  return d === 0 ? 'Prezzo invariato' : d < 0 ? `${d}% da quando l’hai salvato` : `+${d}% da quando l’hai salvato`
+}
+
+/** Add-to-cart that tells you what it did: glow while adding, check when done, and how many you already have. */
+function CartButton({ id, variant, qty }: { id: string; variant: string; qty: number }) {
+  const inCart = useStore((s) => s.cart.filter((l) => l.id === id).reduce((a, l) => a + l.qty, 0))
+  const addToCart = useStore((s) => s.addToCart)
+  const [state, setState] = useState<'idle' | 'adding' | 'added'>('idle')
+  const click = () => {
+    if (state === 'adding') return
+    setState('adding')
+    setTimeout(() => {
+      addToCart(id, variant, qty)
+      setState('added')
+      setTimeout(() => setState('idle'), 1400)
+    }, 450)
+  }
+  return (
+    <Btn
+      tone="cart"
+      size="lg"
+      block
+      icon={state === 'added' ? <Check size={16} /> : <ShoppingBag size={16} />}
+      onClick={click}
+      count={inCart}
+      progress={state === 'adding' ? 'loading' : undefined}
+      sub={state === 'added' ? `Ora ne hai ${inCart} nel carrello` : inCart ? `${inCart} già nel carrello` : undefined}
+    >
+      {state === 'adding' ? 'Aggiungo…' : state === 'added' ? 'Aggiunto' : 'Aggiungi al carrello'}
+    </Btn>
   )
 }

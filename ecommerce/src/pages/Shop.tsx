@@ -1,7 +1,7 @@
 import { SlidersHorizontal, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Filters } from '../components/Filters'
+import { Filters, filterGroups } from '../components/Filters'
 import { InfiniteGrid } from '../components/InfiniteGrid'
 import { Btn, Rule, Sheet } from '../components/ui'
 import { CATEGORIES } from '../data/catalog'
@@ -73,7 +73,7 @@ export function Shop() {
     <div className="container shop">
       <aside className="shop__side" data-lenis-prevent>
         <p className="mono up small muted">Filtri</p>
-        <Filters q={q} set={set} />
+        <Filters q={q} set={set} results={total} />
       </aside>
       <section className="shop__main">
         <header className="shop__head">
@@ -84,8 +84,15 @@ export function Shop() {
             <h1 className="dot-title shop__title">{title}</h1>
           </div>
           <div className="shop__tools">
-            <Btn size="sm" className="shop__filterbtn" icon={<SlidersHorizontal size={14} />} onClick={() => setOpen(true)}>
-              Filtri{active.length ? ` · ${active.length}` : ''}
+            <Btn
+              size="sm"
+              className="shop__filterbtn"
+              icon={<SlidersHorizontal size={14} />}
+              onClick={() => setOpen(true)}
+              count={active.length}
+              progress={filterGroups(q).filter(([, v]) => v).length / 5}
+            >
+              Filtri
             </Btn>
             <label className="select">
               <span className="mono small muted">Ordina</span>
@@ -115,7 +122,7 @@ export function Shop() {
         <InfiniteGrid query={effective} onTotal={setTotal} />
       </section>
       <Sheet open={open} onClose={() => setOpen(false)} title="Filtri" side="left">
-        <Filters q={q} set={set} />
+        <Filters q={q} set={set} results={total} />
         <div className="sheet__cta">
           <Btn tone="ink" block onClick={() => setOpen(false)}>
             Mostra {total ?? ''} risultati

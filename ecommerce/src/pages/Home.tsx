@@ -1,9 +1,10 @@
 import { motion, useScroll, useTransform } from 'motion/react'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
-import { type ReactNode, useMemo, useRef } from 'react'
+import { Children, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { InfiniteGrid } from '../components/InfiniteGrid'
 import { Photo } from '../components/Photo'
+import { Track } from '../components/Signal'
 import { ProductCard } from '../components/ProductCard'
 import { Btn, Reveal, Rule } from '../components/ui'
 import { CATEGORIES, PRODUCTS, dealScore, realDiscount } from '../data/catalog'
@@ -214,7 +215,25 @@ function FeatureTile({ to, photo, kicker, title, cta }: { to: string; photo: str
 
 function Carousel({ eyebrow, title, to, children, wide }: { eyebrow: string; title: string; to?: string; children: ReactNode; wide?: boolean }) {
   const track = useRef<HTMLDivElement>(null)
+  // Scroll position drives the dot-line under the row; tapping the line jumps there.
+  const [pos, setPos] = useState({ p: 0, visible: 1 })
+  const measure = () => {
+    const el = track.current
+    if (!el) return
+    const max = el.scrollWidth - el.clientWidth
+    setPos({ p: max > 0 ? el.scrollLeft / max : 1, visible: el.clientWidth / el.scrollWidth })
+  }
+  useEffect(() => {
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [])
   const scroll = (dir: number) => track.current?.scrollBy({ left: dir * track.current.clientWidth * 0.8, behavior: 'smooth' })
+  const seek = (v: number) => {
+    const el = track.current
+    if (el) el.scrollTo({ left: v * (el.scrollWidth - el.clientWidth), behavior: 'smooth' })
+  }
+  const count = Children.count(children)
   return (
     <div className="carousel">
       <div className="container">
@@ -228,18 +247,27 @@ function Carousel({ eyebrow, title, to, children, wide }: { eyebrow: string; tit
                   Vedi tutto
                 </Link>
               )}
-              <button onClick={() => scroll(-1)} aria-label="Indietro">
+              <button onClick={() => scroll(-1)} aria-label="Indietro" disabled={pos.p <= 0.01}>
                 <ArrowLeft size={18} />
               </button>
-              <button onClick={() => scroll(1)} aria-label="Avanti">
+              <button onClick={() => scroll(1)} aria-label="Avanti" disabled={pos.p >= 0.99}>
                 <ArrowRight size={18} />
               </button>
             </div>
           }
         />
       </div>
-      <div ref={track} className={`carousel__track${wide ? ' carousel__track--wide' : ''}`} data-lenis-prevent-wheel>
+      <div ref={track} className={`carousel__track${wide ? ' carousel__track--wide' : ''}`} data-lenis-prevent-wheel onScroll={measure}>
         {children}
+      </div>
+      <div className="container carousel__sig">
+        <Track
+          value={pos.p}
+          size="sm"
+          onSeek={seek}
+          ariaLabel={`Posizione nel carosello ${title}`}
+          aside={`${Math.min(count, Math.round(pos.visible * count + pos.p * count * (1 - pos.visible)))} / ${count}`}
+        />
       </div>
     </div>
   )

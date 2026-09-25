@@ -7,8 +7,9 @@ import { suggest } from '../api/client'
 import { CATEGORIES, PRODUCT_BY_ID } from '../data/catalog'
 import { findPlace } from '../data/shipping'
 import { money } from '../lib/format'
-import { cartCount, useStore } from '../store/store'
+import { FREE_SHIP, cartCount, cartTotals, useStore } from '../store/store'
 import { Photo } from './Photo'
+import { LoadingLine } from './Signal'
 import { ShippingEstimator } from './Shipping'
 import { Btn, IconBtn, Sheet } from './ui'
 
@@ -114,6 +115,9 @@ function Header({ onSearch, onLocation, onMenu }: { onSearch: () => void; onLoca
   const nav = useNavigate()
   const { pathname, search } = useLocation()
   const [hidden, setHidden] = useState(false)
+  const [hover, setHover] = useState<string | null>(null)
+  const pending = useStore((s) => s.pending)
+  const subtotal = useStore((s) => cartTotals(s.cart).subtotal)
   const last = useRef(0)
   useEffect(() => {
     // Nike-style: the header hides while scrolling down and returns on scroll up.
@@ -146,12 +150,18 @@ function Header({ onSearch, onLocation, onMenu }: { onSearch: () => void; onLoca
             <Menu size={22} />
           </button>
           <Logo />
-          <nav className="hdr__nav">
-            {NAV.map(([l, to]) => (
-              <Link key={l} to={to} className={pathname + search === to ? 'is-active' : ''}>
-                {l}
-              </Link>
-            ))}
+          <nav className="hdr__nav" onMouseLeave={() => setHover(null)}>
+            {NAV.map(([l, to]) => {
+              const active = pathname + search === to
+              // The dot follows the pointer, then returns to the current section.
+              const showDot = hover ? hover === l : active
+              return (
+                <Link key={l} to={to} className={active ? 'is-active' : ''} onMouseEnter={() => setHover(l)}>
+                  {l}
+                  {showDot && <motion.span layoutId="navdot" className="navdot" transition={{ type: 'spring', stiffness: 500, damping: 36 }} />}
+                </Link>
+              )
+            })}
           </nav>
           <div className="hdr__actions">
             <button className="hdr__search" onClick={onSearch}>
@@ -161,16 +171,40 @@ function Header({ onSearch, onLocation, onMenu }: { onSearch: () => void; onLoca
             <IconBtn label="Preferiti" tone="fav" badge={wish} onClick={() => nav('/wishlist')}>
               <Heart size={19} />
             </IconBtn>
-            <IconBtn label="Account" tone="account" active={!!user} onClick={() => nav(user ? '/account' : '/login')}>
-              <User size={19} />
-            </IconBtn>
-            <IconBtn label="Carrello" tone="cart" badge={count} onClick={() => nav('/cart')}>
-              <ShoppingBag size={19} />
-            </IconBtn>
+            <span className="ringbtn">
+              <IconBtn label={user ? `Account — connesso come ${user.name}` : 'Accedi'} tone="account" onClick={() => nav(user ? '/account' : '/login')}>
+                <User size={19} />
+              </IconBtn>
+              {user && <span className="hdr__status" title="Connesso" />}
+            </span>
+            <FreeShipRing subtotal={subtotal}>
+              <IconBtn label="Carrello" tone="cart" badge={count} onClick={() => nav('/cart')}>
+                <ShoppingBag size={19} />
+              </IconBtn>
+            </FreeShipRing>
           </div>
         </div>
+        <LoadingLine active={pending > 0} />
       </header>
     </>
+  )
+}
+
+/** Ring around the cart icon = progress toward free shipping; turns green once unlocked. */
+function FreeShipRing({ subtotal, children }: { subtotal: number; children: ReactNode }) {
+  const p = Math.min(1, subtotal / FREE_SHIP)
+  const C = 2 * Math.PI * 19
+  const title = subtotal === 0 ? '' : p >= 1 ? 'Spedizione gratuita sbloccata' : `Mancano ${money(FREE_SHIP - subtotal)} alla spedizione gratuita`
+  return (
+    <span className="ringbtn" title={title}>
+      {children}
+      {subtotal > 0 && (
+        <svg className={`ringbtn__ring${p >= 1 ? ' is-done' : ''}`} viewBox="0 0 40 40" width="40" height="40" aria-hidden>
+          <circle className="bg" cx="20" cy="20" r="19" />
+          <circle className="fg" cx="20" cy="20" r="19" strokeDasharray={C} strokeDashoffset={C * (1 - p)} />
+        </svg>
+      )}
+    </span>
   )
 }
 
@@ -284,6 +318,7 @@ function Toasts() {
           >
             <span className="toast__dot" />
             {t.text}
+            <span className="toast__timer" />
           </motion.div>
         ))}
       </AnimatePresence>

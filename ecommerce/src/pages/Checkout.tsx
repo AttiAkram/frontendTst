@@ -7,6 +7,7 @@ import { AppleMark, GoogleG, KlarnaMark, MastercardMark, PayPalMark, VisaMark } 
 import { Photo } from '../components/Photo'
 import { ShippingEstimator } from '../components/Shipping'
 import { Btn, Rule } from '../components/ui'
+import { Track } from '../components/Signal'
 import { PRODUCT_BY_ID } from '../data/catalog'
 import { type ShipSpeed, findPlace } from '../data/shipping'
 import { money } from '../lib/format'
@@ -79,6 +80,7 @@ export function Checkout() {
   const total = t.subtotal - t.discount + shipPrice
   const place = findPlace(addr.cap)
   const addrOk = addr.name && addr.street && place
+  const cardFields = [luhn(card.num), card.name.trim().length > 2, /^\d\d\/\d\d$/.test(card.exp), card.cvc.length >= 3]
   const cardOk = method !== 'card' || (luhn(card.num) && /^\d\d\/\d\d$/.test(card.exp) && card.cvc.length >= 3)
 
   const pay = async () => {
@@ -285,6 +287,14 @@ export function Checkout() {
                               />
                             </label>
                           </div>
+                          <Track
+                            size="sm"
+                            tone={cardOk ? 'account' : 'ink'}
+                            value={cardFields.filter(Boolean).length / 4}
+                            marks={cardFields.map((ok, i) => ({ at: (i + 1) / 5, done: ok }))}
+                            label={cardOk ? 'Carta pronta' : `Carta: ${cardFields.filter(Boolean).length} di 4 campi`}
+                            aside={cardBrand(card.num) ?? ''}
+                          />
                           <p className="mono small muted">
                             <Lock size={11} /> 3-D Secure · i dati vanno direttamente al PSP (tokenizzati), mai sui nostri server.
                           </p>
@@ -362,7 +372,16 @@ export function Checkout() {
                     </button>
                   </div>
                 </dl>
-                <Btn tone="buy" size="lg" block onClick={pay} disabled={status === 'paying'} icon={status === 'paying' ? <span className="spinner spinner--light" /> : <Lock size={16} />}>
+                <Btn
+                  tone="buy"
+                  size="lg"
+                  block
+                  onClick={pay}
+                  disabled={status === 'paying'}
+                  icon={<Lock size={16} />}
+                  progress={status === 'paying' ? 'loading' : undefined}
+                  sub={status === 'paying' ? 'Sto parlando con la banca · 3-D Secure' : `Arriva ${eta.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'short' })}`}
+                >
                   {status === 'paying' ? 'Autorizzazione…' : `Paga ${money(total)}`}
                 </Btn>
                 <p className="mono small muted">Cliccando accetti le condizioni di vendita. Recesso 30 giorni.</p>

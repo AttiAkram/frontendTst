@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { listProducts } from '../api/client'
 import type { CatalogQuery, Product } from '../data/types'
 import { ProductCard, ProductCardSkeleton } from './ProductCard'
-import { Rule } from './ui'
+import { Track } from './Signal'
 
 /** Auto-loading product grid: fetches the next page when the sentinel scrolls into view. */
 export function InfiniteGrid({ query, onTotal }: { query: CatalogQuery; onTotal?: (n: number) => void }) {
@@ -67,7 +67,17 @@ export function InfiniteGrid({ query, onTotal }: { query: CatalogQuery; onTotal?
           <p className="muted">Prova a togliere qualche filtro.</p>
         </div>
       )}
-      {next == null && total != null && total > 0 && <Rule variant="end" label={`Fine · ${total} prodotti`} />}
+      {total != null && total > 0 && (
+        // The feed's own progress: how much of the result set you've seen; glows while the next page loads.
+        <Track
+          className="feedsig"
+          value={items.length / total}
+          loading={loading}
+          tone={next == null ? 'account' : 'ink'}
+          label={loading ? 'Carico altri prodotti…' : next == null ? 'Hai visto tutto' : 'Continua a scorrere'}
+          aside={`${items.length} di ${total}`}
+        />
+      )}
     </>
   )
 }

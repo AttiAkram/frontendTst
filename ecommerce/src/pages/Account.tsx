@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { MastercardMark, PayPalMark, VisaMark } from '../components/Marks'
 import { Photo } from '../components/Photo'
 import { Btn, Rule, SectionHead, Switch } from '../components/ui'
+import { Track } from '../components/Signal'
 import { PRODUCT_BY_ID, PRODUCTS } from '../data/catalog'
 import { dateShort, money } from '../lib/format'
 import { EXTENSION_INFO, type Extensions, useStore } from '../store/store'
@@ -59,6 +60,8 @@ export function Account() {
           Esci
         </Btn>
       </header>
+
+      <ProfileCompletion />
 
       <div className="tiles">
         {TILES.map(([id, t, d, icon], i) => (
@@ -328,5 +331,32 @@ function Security() {
         </div>
       </div>
     </section>
+  )
+}
+
+/** Account setup as a dot-line: each dot is a step, the line is how complete the profile is. */
+function ProfileCompletion() {
+  const alerts = useStore((s) => s.alerts.length)
+  const member = useStore((s) => s.member)
+  const steps: [string, boolean][] = [
+    ['Accesso', true],
+    ['Indirizzo', true],
+    ['Pagamento', true],
+    ['Passkey', true],
+    ['Avviso prezzo', alerts > 0],
+    ['Plus', member],
+  ]
+  const done = steps.filter(([, v]) => v).length
+  const next = steps.find(([, v]) => !v)
+  return (
+    <div className="profilesig">
+      <Track
+        tone="account"
+        value={done / steps.length}
+        marks={steps.map(([l, v], i) => ({ at: (i + 1) / (steps.length + 1), label: l, done: v }))}
+        label={done === steps.length ? 'Profilo completo' : `Profilo al ${Math.round((done / steps.length) * 100)}% · prossimo: ${next?.[0]}`}
+        aside={`${done}/${steps.length}`}
+      />
+    </div>
   )
 }

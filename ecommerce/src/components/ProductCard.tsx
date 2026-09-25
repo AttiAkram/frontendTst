@@ -12,6 +12,7 @@ export function ProductCard({ p, index = 0 }: { p: Product; index?: number }) {
   const wished = useStore((s) => s.wishlist.some((w) => w.id === p.id))
   const inCompare = useStore((s) => s.compare.includes(p.id))
   const ext = useStore((s) => s.extensions)
+  const inCart = useStore((s) => s.cart.filter((l) => l.id === p.id).reduce((a, l) => a + l.qty, 0))
   const { toggleWish, addToCart, toggleCompare } = useStore.getState()
   const claimed = claimedDiscount(p)
   const real = realDiscount(p)
@@ -47,7 +48,7 @@ export function ProductCard({ p, index = 0 }: { p: Product; index?: number }) {
         </div>
 
         <button className="pcard__quick" onClick={() => addToCart(p.id, p.variants[0].id)}>
-          <Plus size={16} strokeWidth={2.4} /> Aggiungi al carrello
+          <Plus size={16} strokeWidth={2.4} /> {inCart ? `Aggiungine un altro · ${inCart} nel carrello` : 'Aggiungi al carrello'}
         </button>
       </div>
 

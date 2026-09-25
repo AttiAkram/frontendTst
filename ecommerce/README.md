@@ -29,6 +29,39 @@ il backend sostituisce il corpo delle funzioni con delle `fetch()` — vedi [`do
 - Animazioni: [Motion](https://motion.dev) (parallax dell'hero, reveal, transizioni, gesture), [Lenis](https://lenis.darkroom.engineering) per lo smooth scroll; header che si nasconde scorrendo verso il basso.
 - Foto: Unsplash (licenza gratuita), elencate in `src/data/images.ts` e caricate dal browser; se una non carica compare un riquadro neutro con il nome. Il backend manderà le immagini vere nel campo `product.images`.
 
+## Segnali funzionali (linee + punti)
+
+Ogni linea con punto è un indicatore, non una decorazione. Un solo componente, `Track` (`src/components/Signal.tsx`):
+linea = totale, parte piena = fatto, **punto = dove sei ora**, **anello finale = obiettivo** (si riempie a completamento), **punto che corre con glow = sta caricando**.
+
+| Dove | Cosa indica |
+|---|---|
+| Sotto l'header | Linea con glow mentre una chiamata API è in corso |
+| Separatori di sezione | Si riempiono mentre leggi il blocco, l'anello si chiude quando l'hai superato |
+| Menu in alto, tab prodotto | Il punto segue il mouse / la sezione attiva; sotto le tab, avanzamento di lettura della pagina |
+| Caroselli | Posizione nello scroll + "4 / 12"; clic sulla linea per saltare |
+| Feed automatico | "36 di 320" visti; glow mentre carica la pagina successiva, anello verde a fine lista |
+| Filtri | Un punto per gruppo di filtri attivo + linea = % di catalogo escluso; il tasto "Filtri" su mobile mostra conteggio e linea |
+| Prezzo (pagina prodotto) | Punto = prezzo di oggi fra minimo e massimo a 12 mesi, tacca = media, colore = conviene / aspetta |
+| Disponibilità | Linea delle scorte, rossa quando sta finendo |
+| Consegna | Countdown all'orario limite per la consegna più rapida (la linea si svuota) |
+| Carrello | Linea verso la spedizione gratuita (39 €) + anello attorno all'icona del carrello nell'header |
+| Coupon | Glow mentre cerca, anello verde quando applica |
+| Carta di credito | Un punto per campo valido (numero, intestatario, scadenza, CVC) |
+| Preferiti | Anello = prezzo quando l'hai salvato, punto = oggi, tacca = avviso prezzo |
+| Account | Completamento del profilo, un punto per passo |
+| Toast | Linea che si consuma fino alla chiusura automatica |
+
+I **bottoni** dicono cosa succede o cosa è già successo:
+- **Aggiungi al carrello:** quanti ne hai già; glow mentre aggiunge, poi "Aggiunto ✓".
+- **Compra ora:** data di arrivo.
+- **Preferiti:** variazione di prezzo da quando l'hai salvato.
+- **Confronta:** "2/4" con la linea.
+- **Mostra altre recensioni:** "6 di 24 lette".
+- **Paga:** glow durante l'autorizzazione 3-D Secure.
+- **Frecce del carosello:** si disattivano ai bordi.
+- **Icona account:** punto verde quando sei connesso.
+
 ## Pagine
 
 | Rotta | Contenuto |

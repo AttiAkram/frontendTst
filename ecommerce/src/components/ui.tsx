@@ -1,5 +1,6 @@
-import { AnimatePresence, motion } from 'motion/react'
-import { type ReactNode, useEffect, useId } from 'react'
+import { AnimatePresence, motion, useScroll, useSpring, useTransform } from 'motion/react'
+import { Track } from './Signal'
+import { type ReactNode, useEffect, useId, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { X } from 'lucide-react'
 import { trustGrade } from '../data/catalog'
@@ -23,14 +24,38 @@ interface BtnProps {
   active?: boolean
   label?: string
   className?: string
+  /** Second line: what will happen (e.g. delivery date). */
+  sub?: ReactNode
+  /** Built-in indicator line: 0..1 fills it, 'loading' runs the glow. */
+  progress?: number | 'loading'
+  /** Small counter chip (e.g. how many already in the cart). */
+  count?: number
 }
 
-export function Btn({ tone = 'ghost', children, onClick, to, icon, size = 'md', block, disabled, type = 'button', active, label, className = '' }: BtnProps) {
-  const cls = `btn btn--${tone} btn--${size}${block ? ' btn--block' : ''}${active ? ' is-active' : ''} ${className}`
+export function Btn({ tone = 'ghost', children, onClick, to, icon, size = 'md', block, disabled, type = 'button', active, label, className = '', sub, progress, count }: BtnProps) {
+  const cls = `btn btn--${tone} btn--${size}${block ? ' btn--block' : ''}${active ? ' is-active' : ''}${sub ? ' btn--stack' : ''} ${className}`
   const inner = (
     <>
-      <span className="btn__label">{children}</span>
-      {icon && <span className="btn__icon">{icon}</span>}
+      {sub ? (
+        <span className="btn__stack">
+          <span className="btn__label">
+            {children}
+            {icon && <span className="btn__icon">{icon}</span>}
+          </span>
+          <span className="btn__sub">{sub}</span>
+        </span>
+      ) : (
+        <>
+          <span className="btn__label">{children}</span>
+          {icon && <span className="btn__icon">{icon}</span>}
+        </>
+      )}
+      {!!count && <span className="btn__count">{count}</span>}
+      {progress != null && (
+        <span className={`btn__sig${progress === 'loading' ? ' is-loading' : ''}`}>
+          <span style={{ width: progress === 'loading' ? undefined : `${Math.min(1, progress) * 100}%` }} />
+        </span>
+      )}
     </>
   )
   if (to)
@@ -60,19 +85,32 @@ export function IconBtn({ children, onClick, label, tone = 'ghost', active, badg
 /* ------------------------------------------------------------------ */
 /* Dot-and-line rules — they mark where one "thing" ends and the next begins. */
 
+/**
+ * Section rule. `dot` / `end` rules are scroll-linked: the line fills as you read through the block
+ * and the ring closes when you've passed it. `dashdot` stays a static inner separator.
+ */
 export function Rule({ label, index, variant = 'dot' }: { label?: string; index?: string; variant?: 'dot' | 'dashdot' | 'end' }) {
+  if (variant === 'dashdot') return <div className="rule rule--dashdot" role="separator"><span className="rule__line" /></div>
+  return <ScrollRuleLabeled label={label} index={index} />
+}
+
+function ScrollRuleLabeled({ label, index }: { label?: string; index?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'start 30%'] })
+  const p = useSpring(scrollYProgress, { stiffness: 140, damping: 30 })
+  const done = useTransform(p, (x): number => (x > 0.97 ? 1 : 0))
+  const ringBg = useTransform(done, [0, 1], ['#ffffff', '#111111'])
+  const ringScale = useTransform(done, [0, 1], [1, 1.25])
   return (
-    <div className={`rule rule--${variant}`} role="separator">
-      <span className="rule__cap" />
-      <span className="rule__line" />
+    <div ref={ref} className="scrollrule" role="separator">
       {(label || index) && (
-        <span className="rule__label">
-          {index && <b>{index}</b>}
+        <span className="scrollrule__label">
+          {index && <b>{index} </b>}
           {label}
         </span>
       )}
-      {(label || index) && <span className="rule__line rule__line--short" />}
-      <span className="rule__cap rule__cap--end" />
+      <Track motionValue={p} size="sm" goal={false} />
+      <motion.span className="scrollrule__ring" style={{ backgroundColor: ringBg, scale: ringScale }} />
     </div>
   )
 }
@@ -81,7 +119,7 @@ export function SectionHead({ index, title, kicker, action }: { index: string; t
   return (
     <header className="sechead">
       <div className="sechead__meta">
-        <span className="mono muted">{index}</span>
+        {index && <span className="mono muted">{index}</span>}
         {kicker && <span className="mono muted">{kicker}</span>}
       </div>
       <div className="sechead__row">

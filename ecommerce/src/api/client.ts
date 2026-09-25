@@ -4,8 +4,18 @@
  */
 import { PRODUCTS, PRODUCT_BY_ID, dealScore, getQuestions, getReviews, realDiscount, similar } from '../data/catalog'
 import type { CatalogQuery, Product } from '../data/types'
+import { useStore } from '../store/store'
 
-const latency = (ms = 350) => new Promise((r) => setTimeout(r, ms + Math.random() * 250))
+/** Simulated network time; also counts in-flight calls so the UI can show the loading line. */
+const latency = (ms = 350) => {
+  useStore.setState((s) => ({ pending: s.pending + 1 }))
+  return new Promise<void>((r) =>
+    setTimeout(() => {
+      useStore.setState((s) => ({ pending: Math.max(0, s.pending - 1) }))
+      r()
+    }, ms + Math.random() * 250),
+  )
+}
 
 export interface Page<T> {
   items: T[]

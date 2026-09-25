@@ -1,7 +1,9 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { Bell, ShoppingBag, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { Spark } from '../components/Charts'
+import { Track } from '../components/Signal'
+import { priceStats } from '../data/catalog'
+import type { Product } from '../data/types'
 import { Photo } from '../components/Photo'
 import { Btn, IconBtn, Rule, SectionHead, Stars } from '../components/ui'
 import { PRODUCT_BY_ID } from '../data/catalog'
@@ -47,7 +49,7 @@ export function Wishlist() {
                   <Stars value={p.rating} size={10} />
                   <span className="mono small muted">salvato a {money(w.addedPrice)}</span>
                 </div>
-                <Spark p={p} />
+                <SavedVsNow p={p} saved={w.addedPrice} target={alert?.target} />
                 <div className="witem__price">
                   <strong className="mono">{money(p.price)}</strong>
                   {Math.abs(delta) >= 1 && <span className={`mono small ${delta < 0 ? 'ok' : 'bad'}`}>{pct(delta)}</span>}
@@ -70,5 +72,26 @@ export function Wishlist() {
       </div>
       <Rule variant="end" label="fine preferiti" />
     </div>
+  )
+}
+
+/** Line from the 12-month low to high: ring = price when saved, dot = today, mark = your alert target. */
+function SavedVsNow({ p, saved, target }: { p: Product; saved: number; target?: number }) {
+  const { min, max } = priceStats(p, 365)
+  const span = max - min || 1
+  const at = (x: number) => Math.max(0, Math.min(1, (x - min) / span))
+  const marks = [{ at: at(saved), label: `salvato a ${money(saved)}`, done: true }]
+  if (target) marks.push({ at: at(target), label: `avviso a ${money(target)}`, done: p.price <= target })
+  return (
+    <Track
+      className="witem__sig"
+      size="sm"
+      goal={false}
+      tone={p.price < saved ? 'account' : p.price > saved ? 'bad' : 'ink'}
+      value={at(p.price)}
+      marks={marks}
+      label={target ? `Avviso a ${money(target)}` : 'Da quando l’hai salvato'}
+      aside={`${money(min)} — ${money(max)}`}
+    />
   )
 }

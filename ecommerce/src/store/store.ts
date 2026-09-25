@@ -47,6 +47,8 @@ interface State {
   cap: string
   extensions: Extensions
   toasts: Toast[]
+  /** In-flight API calls — drives the glowing loading line. */
+  pending: number
   addToCart: (id: string, variant: string, qty?: number) => void
   setQty: (id: string, variant: string, qty: number) => void
   removeLine: (id: string, variant: string) => void
@@ -90,6 +92,7 @@ export const useStore = create<State>()(
         compare: true,
       },
       toasts: [],
+      pending: 0,
       addToCart: (id, variant, qty = 1) => {
         const cart = [...get().cart]
         const line = cart.find((l) => l.id === id && l.variant === variant)
@@ -149,10 +152,13 @@ export const useStore = create<State>()(
     {
       name: 'ecommerce-store',
       storage: createJSONStorage(() => localStorage),
-      partialize: ({ toasts: _t, ...rest }) => rest,
+      partialize: ({ toasts: _t, pending: _p, ...rest }) => rest,
     },
   ),
 )
+
+/** Free standard shipping threshold (€). */
+export const FREE_SHIP = 39
 
 export const cartCount = (s: State) => s.cart.reduce((a, l) => a + l.qty, 0)
 

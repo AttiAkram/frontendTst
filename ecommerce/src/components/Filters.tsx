@@ -1,4 +1,5 @@
-import { ALL_BRANDS, CATEGORIES } from '../data/catalog'
+import { ALL_BRANDS, CATEGORIES, PRODUCTS } from '../data/catalog'
+import { Track } from './Signal'
 import type { CatalogQuery } from '../data/types'
 import { Chip, Rule, Stars, Switch } from './ui'
 
@@ -10,10 +11,48 @@ const PRICE_STEPS: [string, number | undefined, number | undefined][] = [
   ['> 500 €', 500, undefined],
 ]
 
-export function Filters({ q, set }: { q: CatalogQuery; set: (patch: Partial<CatalogQuery>) => void }) {
+/** Which filter groups are in use — shared by the meter and the mobile "Filtri" button. */
+export function filterGroups(q: CatalogQuery): [string, boolean][] {
+  return [
+    ['Categoria', !!q.category && q.category !== 'all'],
+    ['Prezzo', q.min != null || q.max != null],
+    ['Voto', !!q.rating],
+    ['Marca', !!q.brands?.length],
+    ['Opzioni', !!(q.fast || q.deals || q.trusted || q.hideSponsored)],
+  ]
+}
+
+/** Dot per filter group + a line showing how much of the catalog the filters have excluded. */
+export function FilterMeter({ q, results }: { q: CatalogQuery; results: number | null }) {
+  const groups = filterGroups(q)
+  const on = groups.filter(([, v]) => v).length
+  const narrowed = results == null ? 0 : 1 - results / PRODUCTS.length
+  return (
+    <div className="fmeter">
+      <Track
+        value={narrowed}
+        goal={false}
+        marks={groups.map(([, v], i) => ({ at: (i + 1) / (groups.length + 1), done: v }))}
+        label={on ? `${on} di ${groups.length} filtri attivi` : 'Nessun filtro'}
+        aside={results == null ? '…' : `${results} risultati · −${Math.round(narrowed * 100)}%`}
+        ariaLabel="Quanto hai ristretto il catalogo"
+      />
+      <div className="fmeter__groups">
+        {groups.map(([l, v]) => (
+          <span key={l} className={v ? 'is-on' : ''}>
+            {l}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export function Filters({ q, set, results = null }: { q: CatalogQuery; set: (patch: Partial<CatalogQuery>) => void; results?: number | null }) {
   const brands = q.brands ?? []
   return (
     <div className="filters">
+      <FilterMeter q={q} results={results} />
       <section>
         <h4 className="mono up muted">Categoria</h4>
         <div className="chips">
