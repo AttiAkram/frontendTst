@@ -1,0 +1,11 @@
+{
+  "name": "frontendtst",
+  "private": true,
+  "description": "Workspace root: the deployed app lives in ecommerce/ (see vercel.json).",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "build": "cd ecommerce && npm run build"
+  }
+}
