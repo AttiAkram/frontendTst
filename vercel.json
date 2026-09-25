@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "cd ecommerce 2>/dev/null || cd ../ecommerce; npm install --no-audit --no-fund",
-  "buildCommand": "APP=$(cd ecommerce 2>/dev/null || cd ../ecommerce; pwd) && (cd \"$APP\" && npm run build) && rm -rf dist && cp -R \"$APP/dist\" dist",
-  "outputDirectory": "dist",
+  "installCommand": "cd montaggiopro && npm install --no-audit --no-fund",
+  "buildCommand": "cd montaggiopro && npm run build",
+  "outputDirectory": "montaggiopro/dist",
   "headers": [
     {
       "source": "/assets/(.*)",

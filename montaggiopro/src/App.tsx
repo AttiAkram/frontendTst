@@ -1,86 +1,47 @@
-import { useState, useCallback } from "react"
-import { PlusSquare, List } from "lucide-react"
-import { AuthProvider } from "./context/AuthCtx"
-import { ProfileCtx } from "./context/ProfileCtx"
-import { RoleCtx } from "./context/RoleCtx"
-import { useBreakpoint } from "./hooks/useBreakpoint"
-import { Sidebar } from "./nav/Sidebar"
-import { BottomNav } from "./nav/BottomNav"
-import { MobileHeader } from "./nav/MobileHeader"
-import { FeedPage } from "./pages/FeedPage"
-import { JobBoardPage } from "./pages/JobBoardPage"
-import { SearchPage } from "./pages/SearchPage"
-import { CalendarPage } from "./pages/CalendarPage"
-import { MessagesPage } from "./pages/MessagesPage"
-import { TeamProfilePage } from "./pages/TeamProfilePage"
-import { SettingsPage } from "./pages/SettingsPage"
-import { PlaceholderPage } from "./pages/PlaceholderPage"
-import { TEAMS } from "./data/mock"
-import type { Role, Team, Profile } from "./types"
+import { Suspense, lazy } from 'react'
+import { HashRouter, Route, Routes } from 'react-router-dom'
+import { Layout } from './components/Layout'
+const Account = lazy(() => import('./pages/Account').then((m) => ({ default: m.Account })))
+const Cart = lazy(() => import('./pages/Cart').then((m) => ({ default: m.Cart })))
+const Checkout = lazy(() => import('./pages/Checkout').then((m) => ({ default: m.Checkout })))
+const Compare = lazy(() => import('./pages/Compare').then((m) => ({ default: m.Compare })))
+import { Home } from './pages/Home'
+const Login = lazy(() => import('./pages/Login').then((m) => ({ default: m.Login })))
+const Product = lazy(() => import('./pages/Product').then((m) => ({ default: m.Product })))
+const Shop = lazy(() => import('./pages/Shop').then((m) => ({ default: m.Shop })))
+const Wishlist = lazy(() => import('./pages/Wishlist').then((m) => ({ default: m.Wishlist })))
+import { Btn } from './components/ui'
 
-function AppInner() {
-  const bp = useBreakpoint()
-  const [role, setRole] = useState<Role>("squadra")
-  const [page, setPage] = useState("feed")
-  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null)
-  const [profile, setProfile] = useState<Profile>(TEAMS[0] as Profile)
-
-  const switchRole = useCallback((r: Role) => {
-    setRole(r)
-    setPage(r === "squadra" ? "feed" : "search")
-    setSelectedTeam(null)
-  }, [])
-
-  const openTeam = useCallback((t: Team) => {
-    setSelectedTeam(t)
-    setPage("teamProfile")
-  }, [])
-
-  const goBack = useCallback(() => {
-    setSelectedTeam(null)
-    setPage(role === "squadra" ? "feed" : "search")
-  }, [role])
-
-  const renderPage = () => {
-    switch (page) {
-      case "feed":        return <FeedPage profile={profile} onTeamClick={openTeam} />
-      case "bacheca":     return <JobBoardPage />
-      case "calendar":    return <CalendarPage profile={profile} updateProfile={setProfile} />
-      case "messages":    return <MessagesPage />
-      case "profile":     return <TeamProfilePage team={profile} onSettings={() => setPage("settings")} />
-      case "teamProfile": return <TeamProfilePage team={selectedTeam ?? undefined} onBack={goBack} />
-      case "settings":    return <SettingsPage profile={profile} updateProfile={setProfile} />
-      case "search":      return <SearchPage onTeamClick={openTeam} />
-      case "post":        return <PlaceholderPage label="Pubblica annuncio" icon={PlusSquare} />
-      case "listings":    return <PlaceholderPage label="I miei annunci" icon={List} />
-      default:            return <FeedPage profile={profile} onTeamClick={openTeam} />
-    }
-  }
-
+function NotFound() {
   return (
-    <RoleCtx.Provider value={{ role, setRole: switchRole }}>
-      <ProfileCtx.Provider value={{ profile, updateProfile: setProfile }}>
-        {bp === "mobile" ? (
-          <>
-            <MobileHeader role={role} onToggle={switchRole} page={page} onPage={setPage} />
-            <main style={{ paddingBottom: 56 }}>{renderPage()}</main>
-            <BottomNav page={page} onPage={setPage} role={role} />
-          </>
-        ) : (
-          <>
-            <Sidebar page={page} onPage={setPage} role={role} onToggle={switchRole} />
-            <main style={{ marginLeft: 220, minHeight: "100vh" }}>{renderPage()}</main>
-          </>
-        )}
-      </ProfileCtx.Provider>
-    </RoleCtx.Provider>
+    <div className="container empty">
+      <p className="dot-title">404.</p>
+      <p className="muted">Questa pagina non esiste. Niente di più.</p>
+      <Btn to="/">Home</Btn>
+    </div>
   )
 }
 
+// HashRouter so the demo works on any static host (GitHub Pages, file preview) without rewrites.
 export default function App() {
   return (
-    <AuthProvider>
-      <AppInner />
-    </AuthProvider>
+    <HashRouter>
+      <Layout>
+        <Suspense fallback={<div className="container empty"><span className="spinner" /></div>}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/p/:id" element={<Product />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/compare" element={<Compare />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        </Suspense>
+      </Layout>
+    </HashRouter>
   )
 }

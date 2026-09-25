@@ -1,11 +1,11 @@
 {
   "name": "frontendtst",
   "private": true,
-  "description": "Workspace root: the deployed app lives in ecommerce/ (see vercel.json).",
+  "description": "Workspace root: the deployed app lives in montaggiopro/ (the folder the Vercel project builds).",
   "engines": {
     "node": "22.x"
   },
   "scripts": {
-    "build": "cd ecommerce && npm run build"
+    "build": "cd montaggiopro && npm run build"
   }
 }

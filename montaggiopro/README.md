@@ -4,7 +4,7 @@ Un'alternativa ad Amazon con un linguaggio editoriale in stile Patagonia / Nike:
 React 19 + Vite + TypeScript. Mobile e desktop.
 
 ```bash
-cd ecommerce
+cd montaggiopro
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + build statico in dist/
@@ -12,6 +12,8 @@ npm run build      # typecheck + build statico in dist/
 
 Tutti i dati sono mock deterministici (320 prodotti generati) dietro a `src/api/client.ts`:
 il backend sostituisce il corpo delle funzioni con delle `fetch()` — vedi [`docs/API.md`](docs/API.md).
+
+> La cartella si chiama `montaggiopro/` perché è quella collegata al progetto Vercel esistente: l'app è autonoma qui dentro, come la vecchia MontaggioPro. Per rinominarla basta cambiare anche la *Root Directory* su Vercel.
 
 ## Linguaggio visivo
 
