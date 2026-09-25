@@ -1,45 +1,73 @@
-import { Suspense, lazy } from 'react'
-import { HashRouter, Route, Routes } from 'react-router-dom'
+import { type ReactNode, Suspense, lazy } from 'react'
+import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
-const Account = lazy(() => import('./pages/Account').then((m) => ({ default: m.Account })))
-const Cart = lazy(() => import('./pages/Cart').then((m) => ({ default: m.Cart })))
-const Checkout = lazy(() => import('./pages/Checkout').then((m) => ({ default: m.Checkout })))
-const Compare = lazy(() => import('./pages/Compare').then((m) => ({ default: m.Compare })))
-import { Home } from './pages/Home'
-const Login = lazy(() => import('./pages/Login').then((m) => ({ default: m.Login })))
-const Product = lazy(() => import('./pages/Product').then((m) => ({ default: m.Product })))
-const Shop = lazy(() => import('./pages/Shop').then((m) => ({ default: m.Shop })))
-const Wishlist = lazy(() => import('./pages/Wishlist').then((m) => ({ default: m.Wishlist })))
 import { Btn } from './components/ui'
+import { FLOWS, NODES, type NodeId, pathOf } from './nav/map'
+import { Guarded } from './nav/PageNav'
+import { Home } from './pages/Home'
+
+const page = <K extends string>(load: () => Promise<Record<K, () => ReactNode>>, name: K) =>
+  lazy(() => load().then((m) => ({ default: m[name] })))
+
+const Account = page(() => import('./pages/Account'), 'Account')
+const Cart = page(() => import('./pages/Cart'), 'Cart')
+const Checkout = page(() => import('./pages/Checkout'), 'Checkout')
+const Compare = page(() => import('./pages/Compare'), 'Compare')
+const Login = page(() => import('./pages/Login'), 'Login')
+const Order = page(() => import('./pages/Order'), 'Order')
+const Product = page(() => import('./pages/Product'), 'Product')
+const Shop = page(() => import('./pages/Shop'), 'Shop')
+const SiteMap = page(() => import('./pages/SiteMap'), 'SiteMap')
+const Wishlist = page(() => import('./pages/Wishlist'), 'Wishlist')
+
+type FlowStep = (typeof FLOWS)['checkout']['steps'][number]
+
+/**
+ * One page per node of the navigation map. The Record type makes TypeScript fail
+ * if a node in nav/map.ts has no page (or a page has no node).
+ * Flow steps share one component so their in-progress state survives Back/Forward.
+ */
+const PAGES: Record<Exclude<NodeId, FlowStep>, ReactNode> = {
+  home: <Home />,
+  shop: <Shop />,
+  product: <Product />,
+  compare: <Compare />,
+  wishlist: <Wishlist />,
+  cart: <Cart />,
+  order: <Order />,
+  login: <Login />,
+  account: <Account />,
+  map: <SiteMap />,
+}
 
 function NotFound() {
   return (
     <div className="container empty">
       <p className="dot-title">404.</p>
-      <p className="muted">Questa pagina non esiste. Niente di più.</p>
-      <Btn to="/">Home</Btn>
+      <p className="muted">Questa pagina non è sulla mappa.</p>
+      <div className="row-8">
+        <Btn to="/">Home</Btn>
+        <Btn to="/mappa">Mappa del sito</Btn>
+      </div>
     </div>
   )
 }
 
-// HashRouter so the demo works on any static host (GitHub Pages, file preview) without rewrites.
+// HashRouter so the demo works on any static host (GitHub Pages, Vercel, file preview) without rewrites.
 export default function App() {
   return (
     <HashRouter>
       <Layout>
         <Suspense fallback={<div className="container empty"><span className="spinner" /></div>}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/p/:id" element={<Product />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/compare" element={<Compare />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/account" element={<Account />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+          <Routes>
+            {(Object.keys(PAGES) as (keyof typeof PAGES)[]).map((id) => (
+              <Route key={id} path={NODES[id].path} element={<Guarded id={id}>{PAGES[id]}</Guarded>} />
+            ))}
+            {/* Flow: one route, the step is in the URL (/checkout/indirizzo …). Every step shares the flow's guard. */}
+            <Route path="/checkout/:step" element={<Guarded id={FLOWS.checkout.steps[0]}><Checkout /></Guarded>} />
+            <Route path="/checkout" element={<Navigate to={pathOf(FLOWS.checkout.steps[0])} replace />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </Suspense>
       </Layout>
     </HashRouter>

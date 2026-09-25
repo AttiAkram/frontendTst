@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 import { Bell, Box, CreditCard, Gift, History, LogOut, MapPin, MessageSquare, Puzzle, Repeat, Shield, Sparkles, UserCog } from 'lucide-react'
 import { type ReactNode, useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { MastercardMark, PayPalMark, VisaMark } from '../components/Marks'
 import { Photo } from '../components/Photo'
 import { Btn, Rule, SectionHead, Switch } from '../components/ui'
@@ -34,15 +34,11 @@ const ORDERS = [
 
 export function Account() {
   const user = useStore((s) => s.user)
-  const nav = useNavigate()
   const { hash } = useLocation()
-  useEffect(() => {
-    if (!user) nav('/login', { replace: true })
-  }, [user, nav])
   useEffect(() => {
     if (hash) setTimeout(() => document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth' }), 400)
   }, [hash])
-  if (!user) return null
+  if (!user) return null // the map's `auth` guard redirects before this renders
 
   return (
     <div className="container section account">

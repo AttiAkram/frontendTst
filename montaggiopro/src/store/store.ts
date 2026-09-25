@@ -45,6 +45,9 @@ interface State {
   user: { id: string; name: string; email: string; provider: AuthProvider } | null
   member: boolean
   cap: string
+  /** Last shop URL browsed — Back from a product returns to these exact results. */
+  lastListing: string
+  setLastListing: (url: string) => void
   extensions: Extensions
   toasts: Toast[]
   /** In-flight API calls — drives the glowing loading line. */
@@ -82,6 +85,8 @@ export const useStore = create<State>()(
       user: null,
       member: false,
       cap: '',
+      lastListing: '',
+      setLastListing: (lastListing) => set({ lastListing }),
       extensions: {
         priceHistory: true,
         reviewCheck: true,

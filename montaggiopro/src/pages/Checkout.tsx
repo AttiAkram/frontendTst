@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { Check, CreditCard, Landmark, Lock, PackageCheck } from 'lucide-react'
+import { Check, CreditCard, Landmark, Lock } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { type PayMethod, placeOrder } from '../api/client'
 import { AppleMark, GoogleG, KlarnaMark, MastercardMark, PayPalMark, VisaMark } from '../components/Marks'
 import { Photo } from '../components/Photo'
@@ -11,6 +11,7 @@ import { Track } from '../components/Signal'
 import { PRODUCT_BY_ID } from '../data/catalog'
 import { type ShipSpeed, findPlace } from '../data/shipping'
 import { money } from '../lib/format'
+import { CHECKOUT_STEPS, pathOf } from '../nav/map'
 import { bestCoupon, cartTotals, useStore } from '../store/store'
 
 export function ExpressPay({ onPay }: { onPay: (m: PayMethod) => void }) {
@@ -55,28 +56,34 @@ function cardBrand(num: string) {
   return null
 }
 
+/** Checkout is the `checkout` flow of the navigation map: each step is its own URL. */
 export function Checkout() {
   const [sp] = useSearchParams()
+  const { step: slug } = useParams()
+  const navigate = useNavigate()
+  const express = !!sp.get('express')
+  const urlStep = Math.max(0, CHECKOUT_STEPS.findIndex((id) => pathOf(id) === `/checkout/${slug}`))
+  const keep = express ? `?express=${sp.get('express')}` : ''
+  const setStep = (i: number) => navigate(pathOf(CHECKOUT_STEPS[i]) + keep)
   const cart = useStore((s) => s.cart)
   const user = useStore((s) => s.user)
   const cap = useStore((s) => s.cap)
   const setCap = useStore((s) => s.setCap)
   const ext = useStore((s) => s.extensions)
-  const clearCart = useStore((s) => s.clearCart)
-  const [step, setStep] = useState(sp.get('express') ? 2 : 0)
   const [addr, setAddr] = useState({ name: user?.name ?? '', street: '', cap, city: findPlace(cap)?.city ?? '', phone: '' })
   const [speed, setSpeed] = useState<ShipSpeed>('standard')
   const [shipPrice, setShipPrice] = useState(0)
-  const [method, setMethod] = useState<PayMethod>('card')
+  const [method, setMethod] = useState<PayMethod>(() => {
+    const m = sp.get('express') as PayMethod | null
+    return m && ['applepay', 'googlepay', 'paypal'].includes(m) ? m : 'card'
+  })
   const [card, setCard] = useState({ num: '', exp: '', cvc: '', name: '' })
   const [flip, setFlip] = useState(false)
   const [bank, setBank] = useState(BANKS[0])
-  const [status, setStatus] = useState<'idle' | 'paying' | 'done'>('idle')
-  const [orderId, setOrderId] = useState('')
-  const [snapshot, setSnapshot] = useState(cart)
+  const [status, setStatus] = useState<'idle' | 'paying'>('idle')
 
   const coupon = ext.coupons ? bestCoupon(cart) : null
-  const t = cartTotals(status === 'done' ? snapshot : cart, coupon?.off ?? 0)
+  const t = cartTotals(cart, coupon?.off ?? 0)
   const total = t.subtotal - t.discount + shipPrice
   const place = findPlace(addr.cap)
   const addrOk = addr.name && addr.street && place
@@ -85,11 +92,10 @@ export function Checkout() {
 
   const pay = async () => {
     setStatus('paying')
-    setSnapshot(cart)
     const r = await placeOrder({ method, total })
-    setOrderId(r.orderId)
-    setStatus('done')
-    clearCart()
+    // replace: Back from the order page must not land on a payment that already happened.
+    // The order page empties the cart once it's shown (emptying it here would trip this flow's cart guard first).
+    navigate(pathOf('order', { id: r.orderId }), { replace: true, state: { eta: eta.toISOString(), total, placed: true } })
   }
 
   const eta = useMemo(() => {
@@ -98,16 +104,10 @@ export function Checkout() {
     return d
   }, [speed])
 
-  if (status === 'done') return <Success orderId={orderId} eta={eta} total={total} />
-  if (!cart.length)
-    return (
-      <div className="container empty">
-        <p className="dot-title">Niente da pagare</p>
-        <Btn to="/shop" tone="cart">
-          Vai allo shop
-        </Btn>
-      </div>
-    )
+  // Flow guard from the map: you can go back freely, but not skip ahead of an incomplete step.
+  const maxStep = !addrOk && !express ? 0 : method === 'card' && !cardOk ? 2 : 3
+  const step = Math.min(urlStep, maxStep)
+  if (urlStep > maxStep) return <Navigate to={pathOf(CHECKOUT_STEPS[maxStep]) + keep} replace />
 
   return (
     <div className="container section checkout">
@@ -124,7 +124,7 @@ export function Checkout() {
           ))}
         </ol>
 
-        {step === 0 && <ExpressPay onPay={(m) => { setMethod(m); setStep(2) }} />}
+        {step === 0 && <ExpressPay onPay={(m) => { setMethod(m); navigate(`${pathOf('checkout.payment')}?express=${m}`) }} />}
 
         <AnimatePresence mode="wait">
           <motion.div key={step} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.3 }} className="checkout__panel">
@@ -432,38 +432,6 @@ export function Checkout() {
           </motion.strong>
         </div>
       </aside>
-    </div>
-  )
-}
-
-function Success({ orderId, eta, total }: { orderId: string; eta: Date; total: number }) {
-  const stages = ['Ordine ricevuto', 'Pagamento confermato', 'In preparazione', 'Spedito', 'Consegnato']
-  return (
-    <div className="container success">
-      <motion.div className="success__badge" initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
-        <PackageCheck size={42} />
-      </motion.div>
-      <h1 className="dot-title">Fatto.</h1>
-      <p className="muted">
-        Ordine <b className="mono">{orderId}</b> · {money(total)} · arrivo previsto {eta.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}
-      </p>
-      <ol className="track">
-        {stages.map((s, i) => (
-          <motion.li key={s} className={i < 2 ? 'is-done' : ''} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.12 }}>
-            <span className="track__dot" />
-            <span className="mono small">{s}</span>
-          </motion.li>
-        ))}
-      </ol>
-      <div className="row-8">
-        <Btn to="/account" tone="account">
-          I miei ordini
-        </Btn>
-        <Btn to="/shop">Continua lo shopping</Btn>
-      </div>
-      <Link to="/" className="mono small muted">
-        ← home
-      </Link>
     </div>
   )
 }

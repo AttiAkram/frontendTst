@@ -12,6 +12,7 @@ import { Btn, Chip, IconBtn, Reveal, Rule, SectionHead, Stars, Tag, TrustBadge }
 import { CATEGORIES, adjustedRating, claimedDiscount, dealScore, priceStats, realDiscount, trustGrade } from '../data/catalog'
 import type { Product as P, Question, Review } from '../data/types'
 import { dateShort, money } from '../lib/format'
+import { pathOf } from '../nav/map'
 import { useStore } from '../store/store'
 
 type Data = Awaited<ReturnType<typeof getProduct>>
@@ -64,17 +65,11 @@ function ProductView({ product: p, reviews, questions, similar }: Data) {
 
   const buyNow = () => {
     addToCart(p.id, variant.id, qty)
-    nav('/checkout')
+    nav(pathOf('checkout.address'))
   }
 
   return (
     <div className="pdp">
-      <div className="container">
-        <p className="crumbs mono small muted">
-          <Link to="/shop">Shop</Link> / <Link to={`/shop?category=${p.category}`}>{cat.label}</Link> / <span>{p.id}</span>
-        </p>
-      </div>
-
       <section className="container pdp__top">
         {/* ---------- Gallery: 2-col grid on desktop, swipe on phone ---------- */}
         <div className="gallery">

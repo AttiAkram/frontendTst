@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 import { Fingerprint, KeyRound, Mail } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { type AuthProvider, signIn } from '../api/client'
 import { AppleMark, GoogleG } from '../components/Marks'
 import { Btn, Rule } from '../components/ui'
@@ -10,6 +10,9 @@ import { useStore } from '../store/store'
 export function Login() {
   const login = useStore((s) => s.login)
   const nav = useNavigate()
+  // Map rule: after login go back to where the guard stopped you (?next=), otherwise to the account.
+  const [sp] = useSearchParams()
+  const next = sp.get('next')?.startsWith('/') ? sp.get('next')! : '/account'
   const [busy, setBusy] = useState<AuthProvider | null>(null)
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
@@ -18,7 +21,7 @@ export function Login() {
     setBusy(p)
     const u = await signIn(p, mail)
     login(u)
-    nav('/account')
+    nav(next, { replace: true })
   }
 
   return (

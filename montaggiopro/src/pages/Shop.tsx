@@ -1,5 +1,5 @@
 import { SlidersHorizontal, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Filters, filterGroups } from '../components/Filters'
 import { InfiniteGrid } from '../components/InfiniteGrid'
@@ -50,6 +50,9 @@ function serialize(q: CatalogQuery) {
 export function Shop() {
   const [sp, setSp] = useSearchParams()
   const q = useMemo(() => parse(sp), [sp])
+  const setLastListing = useStore((s) => s.setLastListing)
+  // Remember these exact results so Back from a product returns here with the same filters.
+  useEffect(() => setLastListing(`/shop${sp.toString() ? `?${sp}` : ''}`), [sp, setLastListing])
   const ext = useStore((s) => s.extensions)
   const [open, setOpen] = useState(false)
   const [total, setTotal] = useState<number | null>(null)

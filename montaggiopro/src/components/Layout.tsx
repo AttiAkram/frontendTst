@@ -10,6 +10,8 @@ import { money } from '../lib/format'
 import { FREE_SHIP, cartCount, cartTotals, useStore } from '../store/store'
 import { Photo } from './Photo'
 import { LoadingLine } from './Signal'
+import { PageNav } from '../nav/PageNav'
+import { resolve } from '../nav/map'
 import { ShippingEstimator } from './Shipping'
 import { Btn, IconBtn, Sheet } from './ui'
 
@@ -71,8 +73,10 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className="app">
       <Header onSearch={() => setSearch(true)} onLocation={() => setLoc(true)} onMenu={() => setMenu(true)} />
       {/* Enter-only transition: an exit phase + lazy routes could leave the old wrapper stuck invisible. */}
+      <PageNav />
       <motion.main
-        key={location.pathname}
+        // Steps of a flow share one key so the flow keeps its state while you go back and forth.
+        key={resolve(location.pathname)?.node.id.startsWith('checkout.') ? 'checkout' : location.pathname}
         className="main"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -267,7 +271,9 @@ function Footer() {
           ))}
         </div>
         <div className="ftr__bottom">
-          <span>© 2026 ecommerce — demo</span>
+          <span>
+            © 2026 ecommerce — demo · <Link to="/mappa">Mappa del sito</Link>
+          </span>
           <span className="ftr__pay">Visa · Mastercard · PayPal · Apple Pay · Google Pay · Klarna</span>
           <span>Italia · EUR €</span>
         </div>

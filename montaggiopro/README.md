@@ -64,6 +64,10 @@ I **bottoni** dicono cosa succede o cosa è già successo:
 - **Frecce del carosello:** si disattivano ai bordi.
 - **Icona account:** punto verde quando sei connesso.
 
+## Mappa di navigazione
+
+Albero delle pagine, flussi, regole Indietro/Avanti e guardie in `src/nav/map.ts`, spiegati in [`docs/MAPPA_NAVIGAZIONE.md`](docs/MAPPA_NAVIGAZIONE.md) e visibili nell'app su `/#/mappa`.
+
 ## Pagine
 
 | Rotta | Contenuto |
@@ -72,7 +76,7 @@ I **bottoni** dicono cosa succede o cosa è già successo:
 | `/shop` | Filtri (categoria, prezzo, voto, marca, consegna domani, offerte vere, recensioni affidabili, no sponsor), ordinamenti, filtri in URL, auto-load |
 | `/p/:id` | Pagina generata dai dati: galleria (trascinabile), buy box, varianti, spedizione per CAP, avviso prezzo, **grafico storico prezzi**, **evoluzione recensioni**, analisi affidabilità, recensioni con filtri + commenti + scrittura, Q&A, "spesso comprati insieme", simili, barra acquisto fissa su mobile |
 | `/cart` | Quantità, salva per dopo, ricerca coupon automatica, stima consegna, pagamento express |
-| `/checkout` | Indirizzo (CAP → città), spedizione (prezzo/ETA per distanza dal magazzino e peso), pagamento: carta (Luhn, brand Mastercard/Visa, anteprima animata), Apple Pay, Google Pay, PayPal, bonifico open-banking, Klarna 3 rate |
+| `/checkout/indirizzo` → `/spedizione` → `/pagamento` → `/riepilogo` → `/ordine/:id` | Indirizzo (CAP → città), spedizione (prezzo/ETA per distanza dal magazzino e peso), pagamento: carta (Luhn, brand Mastercard/Visa, anteprima animata), Apple Pay, Google Pay, PayPal, bonifico open-banking, Klarna 3 rate |
 | `/login` | Google, Apple, passkey, magic link email |
 | `/account` | Hub stile "Il mio account": ordini con tracking, estensioni on/off, Plus, preferenze, indirizzi, pagamenti, avvisi prezzo, cronologia, sicurezza, privacy |
 | `/wishlist` | Variazione di prezzo da quando l'hai salvato, sparkline, avvisi |

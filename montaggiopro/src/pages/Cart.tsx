@@ -7,6 +7,7 @@ import { ShippingEstimator } from '../components/Shipping'
 import { Btn, Rule, SectionHead } from '../components/ui'
 import { PRODUCT_BY_ID } from '../data/catalog'
 import { money } from '../lib/format'
+import { pathOf } from '../nav/map'
 import { FREE_SHIP, bestCoupon, cartTotals, useStore } from '../store/store'
 import { Track } from '../components/Signal'
 import { ExpressPay } from './Checkout'
@@ -133,10 +134,10 @@ export function Cart() {
             <span>Totale</span>
             <strong className="mono">{money(t.subtotal - t.discount)}</strong>
           </div>
-          <Btn tone="buy" size="lg" block icon={<Zap size={16} />} onClick={() => nav('/checkout')}>
+          <Btn tone="buy" size="lg" block icon={<Zap size={16} />} onClick={() => nav(pathOf('checkout.address'))}>
             Procedi all’acquisto
           </Btn>
-          <ExpressPay onPay={() => nav('/checkout?express=1')} />
+          <ExpressPay onPay={(m) => nav(`${pathOf('checkout.payment')}?express=${m}`)} />
           <details className="disclosure">
             <summary>
               <span className="mono up small">Stima consegna</span>
